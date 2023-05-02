@@ -26,4 +26,6 @@ discard_pile = []
 window = tk.Tk()
 window.title("UNAS AMIGAS")
 
+number_players_var = tk.StringVar(window,"1")
+
 
