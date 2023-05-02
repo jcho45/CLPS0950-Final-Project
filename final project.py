@@ -27,5 +27,9 @@ window = tk.Tk()
 window.title("UNAS AMIGAS")
 
 number_players_var = tk.StringVar(window,"1")
+number_players_label = tk.Label(root, text="Number of Players:")
+number_players_dropdown = tk.OptionMenu(window, number_player_var, "1","2","3","4","5")
+number_players_label.pack(side="left")
+
 
 
