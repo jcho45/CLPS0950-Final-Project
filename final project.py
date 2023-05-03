@@ -315,6 +315,25 @@ for n in colors:
         card_png_wild_p4_2 = card_png_wild_p4_2.resize((100, 150))
         card_images_wild_p4_2[f"{wild_p4_2}_{wild_p4_2}"] = ImageTk.PhotoImage(card_png_wild_p4_2)
 
+def deal_cards():
+    global number_players, player_decks, deck
+    number_players = int(number_players_var.get())
+    player_decks = [[]for _ in range(number_players)]
+
+    for i in range(7):
+        for j in range(number_players):
+            player_decks[i].append(deck.pop())
+
+def quit_game():
+    window.destroy()
+
+def select_number_players():
+    number_players = int(number_players.get())
+    if number_players == 1:
+        ai_label = tk.Label(window, f text="Playing Against AI")
+        ai_label.pack()
+    elif number_players in range(2,6):
+        deal_cards()
 
 
 
