@@ -9,7 +9,7 @@ flipped_card = ["black"]
 
 deck = []
 for color_type in colors:
-   for number_type in numbers[1:]:
+   for number_type in numers[1:]:
        deck.append(str(number_type)+""+color_type)
    for action_card_type in action_cards:
         deck.append(action_card_type +""+color_type)
@@ -30,7 +30,6 @@ number_players_var = tk.StringVar(window,"1")
 number_players_label = tk.Label(root, text="Number of Players:")
 number_players_dropdown = tk.OptionMenu(window, number_player_var, "1","2","3","4","5")
 number_players_label.pack(side="left")
-number_players_dropdown.pack(side="left")
 
 card_png = {}
 
@@ -316,27 +315,8 @@ for n in colors:
         card_png_wild_p4_2 = card_png_wild_p4_2.resize((100, 150))
         card_images_wild_p4_2[f"{wild_p4_2}_{wild_p4_2}"] = ImageTk.PhotoImage(card_png_wild_p4_2)
 
-def deal_cards():
-    global number_players, player_decks, deck
-    number_players = int(number_players_var.get())
-    player_decks = [[]for _ in range(number_players)]
 
-    for i in range(7):
-        for j in range(number_players):
-            player_decks[j].append(deck.pop())
 
-def quit_game():
-    window.destroy()
-
-def select_number_players():
-    number_players = int(number_players_var.get())
-    if number_players == 1:
-        ai_label = tk.Label(window, f text="Playing Against AI")
-        ai_label.pack()
-    elif number_players in range(2,6):
-        deal_cards()
-
-window.mainloop()
 
 
 
