@@ -55,6 +55,30 @@ for color in colors:
         card_image = card_image.resize((100, 140))
         card_images[wild_card] = ImageTk.PhotoImage(card_image)
 
+def customize_rules():
+    global allow_stacking, force_play
+    allow_stacking_var = tk.StringVar(window, "yes")
+    allow_stacking_label = tk.Label(window, text="Allow Stacking of Draw2 and Draw4 Cards?")
+    allow_stacking_dropdown = tk.OptionMenu(window, allow_stacking_var, "yes", "no")
+    allow_stacking_label.pack(side="left")
+    allow_stacking_dropdown.pack(side="left")
+
+    force_play_var = tk.StringVar(window, "yes")
+    force_play_label = tk.Label(window, text="Force Players to Play if they have a Playable Card?")
+    force_play_dropdown = tk.OptionMenu(window, force_play_var, "yes", "no")
+    force_play_label.pack(side="left")
+    force_play_dropdown.pack(side="left")
+
+    def save_rules():
+        nonlocal allow_stacking, force_play
+        allow_stacking = allow_stacking_var.get() == "yes"
+        force_play = force_play_var.get() == "yes"
+        rules_window.destroy()
+
+    save_button = tk.Button(rules_window, text="Save", command=save_rules)
+    save_button.pack()
+
+    rules_window.mainloop()
 
 def deal_cards():
     global number_players, player_decks, deck
@@ -63,7 +87,13 @@ def deal_cards():
 
     for i in range(7):
         for j in range(number_players):
-            player_decks[j].append(deck.pop())
+            if deck:
+                player_decks[j].append(deck.pop())
+            else:
+                deck = list(discard_pile)
+                random.shuffle(deck)
+                discard_pile.clear()
+                player_decks[j].append(deck.pop())
 
 def quit_game():
     window.destroy()
@@ -74,6 +104,7 @@ def select_number_players():
         ai_label = tk.Label(window, text = "Playing Against AI")
         ai_label.pack()
     elif number_players in range(2,6):
+        customize_rules()
         deal_cards()
 
 window.mainloop()
