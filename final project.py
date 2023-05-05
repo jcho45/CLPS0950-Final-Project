@@ -2,7 +2,6 @@ import random
 import tkinter as tk
 from PIL import Image, ImageTk
 
-
 colors = ["red", "yellow", "green", "blue"]
 numbers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 action_cards = ["skip", "reverse", "draw2"]
@@ -38,19 +37,19 @@ card_images = {}
 
 for color in colors:
     for number in numbers[1:]:
-        image_path = f"/Users/josephinechen/PycharmProjects/pythonProject/CLPS950_FinalProject_Cards/{color}_{number}.png"
+        image_path = f"/Users/josephinechen/PycharmProjects/pythonProject/CLPS950_FinalProject_Cards copy/{color}_{number}.png"
         card_image = Image.open(image_path)
         card_image = card_image.resize((100, 140))
         card_images[f"{number}_{color}"] = ImageTk.PhotoImage(card_image)
 
     for action_card in action_cards:
-        image_path = f"/Users/josephinechen/PycharmProjects/pythonProject/CLPS950_FinalProject_Cards/{color}_{action_card}.png"
+        image_path = f"/Users/josephinechen/PycharmProjects/pythonProject/CLPS950_FinalProject_Cards copy/{color}_{action_card}.png"
         card_image = Image.open(image_path)
         card_image = card_image.resize((100, 140))
         card_images[f"{action_card}_{color}"] = ImageTk.PhotoImage(card_image)
 
     for wild_card in wild_cards:
-        image_path = f"/Users/josephinechen/PycharmProjects/pythonProject/CLPS950_FinalProject_Cards/{wild_card}.png"
+        image_path = f"/Users/josephinechen/PycharmProjects/pythonProject/CLPS950_FinalProject_Cards copy/{wild_card}.png"
         card_image = Image.open(image_path)
         card_image = card_image.resize((100, 140))
         card_images[wild_card] = ImageTk.PhotoImage(card_image)
@@ -69,8 +68,11 @@ def customize_rules():
     force_play_label.pack(side="left")
     force_play_dropdown.pack(side="left")
 
+    allow_stacking = False
+
     def save_rules():
-        nonlocal allow_stacking, force_play
+        global allow_stacking, force_play
+        #nonlocal allow_stacking, force_play
         allow_stacking = allow_stacking_var.get() == "yes"
         force_play = force_play_var.get() == "yes"
         rules_window.destroy()
