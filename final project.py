@@ -34,18 +34,24 @@ number_players_label.pack(side="left")
 number_players_dropdown.pack(side="left")
 
 def update_draw_pile():
-    draw_pile_count_label.config(text=f"Draw Pile: {len(draw_pile)}")
+    global draw_pile_label, draw_pile
+    draw_pile_label.config(text=f"Draw Pile: {len(draw_pile)}")
+
 
 def update_discard_pile():
+    global discard_pile_label
     if discard_pile:
         top_card = discard_pile[-1]
         card_image = card_images[top_card]
-        discard_pile_label.config(image=card_image)
+        discard_text = f"Current Game Card: {top_card}"
+        discard_pile_label.config(image=card_image, text=discard_text)
         discard_pile_label.image = card_image
+        discard_pile_label.config(text="Current Game Card")
+
 
 def initialize_piles():
     global draw_pile, discard_pile
-    draw_pile = list(card_images.keys())
+    draw_pile = list(deck)
     random.shuffle(draw_pile)
     discard_pile = [draw_pile.pop()]
 
@@ -56,33 +62,44 @@ card_images = {}
 
 for color in colors:
     for number in numbers[1:]:
-        image_path = f"/Users/jacquelinecho/PycharmProjects/CLPS0950-Final-Project/CLPS950_FinalProject_Cards/{number}{color}.png"
+        image_path = f"/Users/josephinechen/PycharmProjects/CLPS0950-Final-Project/CLPS950_FinalProject_Cards/{number}{color}.png"
         card_image = Image.open(image_path)
         card_image = card_image.resize((100, 140))
         card_images[f"{number}{color}"] = ImageTk.PhotoImage(card_image)
 
     for action_card in action_cards:
-        image_path = f"/Users/jacquelinecho/PycharmProjects/CLPS0950-Final-Project/CLPS950_FinalProject_Cards/{action_card}{color}.png"
+        image_path = f"/Users/josephinechen/PycharmProjects/CLPS0950-Final-Project/CLPS950_FinalProject_Cards/{action_card}{color}.png"
         card_image = Image.open(image_path)
         card_image = card_image.resize((100, 140))
         card_images[f"{action_card}{color}"] = ImageTk.PhotoImage(card_image)
 
     for wild_card in wild_cards:
-        image_path = f"/Users/jacquelinecho/PycharmProjects/CLPS0950-Final-Project/CLPS950_FinalProject_Cards/{wild_card}.png"
+        image_path = f"/Users/josephinechen/PycharmProjects/CLPS0950-Final-Project/CLPS950_FinalProject_Cards/{wild_card}.png"
         card_image = Image.open(image_path)
         card_image = card_image.resize((100, 140))
         card_images[f"{wild_card}"] = ImageTk.PhotoImage(card_image)
 
-draw_pile_label = tk.Label(window, text = "Draw Pile:")
-discard_pile_label = tk.Label(window, text = "Discard Pile:")
 
 def draw_random_card():
+    global draw_pile, discard_pile, card_images
+
     if draw_pile:
         random_card = random.choice(draw_pile)
         card_image = card_images[random_card]
 
-        random_card_label = tk.Label(window, image = card_image)
+        random_card_label = tk.Label(window, image=card_image)
         random_card_label.pack()
+
+        random_card_name_label = tk.Label(window, text=random_card)
+        random_card_name_label.pack()
+
+
+
+draw_pile_label = tk.Label(window, text="Draw Pile:")
+draw_pile_label.pack()
+discard_pile_label = tk.Label(window, text="Current Game Card:")
+discard_pile_label.pack()
+
 
 def deal_cards():
     global number_players, player_decks, deck
