@@ -37,7 +37,6 @@ def update_draw_pile():
     global draw_pile_label, draw_pile
     draw_pile_label.config(text=f"Draw Pile: {len(draw_pile)}")
 
-
 def update_discard_pile():
     global discard_pile_label
     if discard_pile:
@@ -62,23 +61,28 @@ card_images = {}
 
 for color in colors:
     for number in numbers[1:]:
-        image_path = f"/Users/josephinechen/PycharmProjects/CLPS0950-Final-Project/CLPS950_FinalProject_Cards/{number}{color}.png"
+        image_path = f"/Users/jacquelinecho/PycharmProjects/CLPS0950-Final-Project/CLPS950_FinalProject_Cards/{number}{color}.png"
         card_image = Image.open(image_path)
         card_image = card_image.resize((100, 140))
         card_images[f"{number}{color}"] = ImageTk.PhotoImage(card_image)
 
     for action_card in action_cards:
-        image_path = f"/Users/josephinechen/PycharmProjects/CLPS0950-Final-Project/CLPS950_FinalProject_Cards/{action_card}{color}.png"
+        image_path = f"/Users/jacquelinecho/PycharmProjects/CLPS0950-Final-Project/CLPS950_FinalProject_Cards/{action_card}{color}.png"
         card_image = Image.open(image_path)
         card_image = card_image.resize((100, 140))
         card_images[f"{action_card}{color}"] = ImageTk.PhotoImage(card_image)
 
     for wild_card in wild_cards:
-        image_path = f"/Users/josephinechen/PycharmProjects/CLPS0950-Final-Project/CLPS950_FinalProject_Cards/{wild_card}.png"
+        image_path = f"/Users/jacquelinecho/PycharmProjects/CLPS0950-Final-Project/CLPS950_FinalProject_Cards/{wild_card}.png"
         card_image = Image.open(image_path)
         card_image = card_image.resize((100, 140))
         card_images[f"{wild_card}"] = ImageTk.PhotoImage(card_image)
 
+draw_pile_label = tk.Label(window, text=f"Draw Pile: {len(draw_pile)}")
+draw_pile_label.pack()
+
+discard_pile_label = tk.Label(window, text="Current Game Card")
+discard_pile_label.pack()
 
 def draw_random_card():
     global draw_pile, discard_pile, card_images
@@ -93,12 +97,25 @@ def draw_random_card():
         random_card_name_label = tk.Label(window, text=random_card)
         random_card_name_label.pack()
 
+        #tried to make a draw button next to the draw pile so when a player clicks it, a card is drawn and added to their deck
+        draw_button = tk.Button(window, text="Draw", command=lambda card=random_card: draw(card))
+        draw_button.pack()
 
+        def draw(card):
+            draw_pile.remove(card)
+            update_draw_pile()
 
-draw_pile_label = tk.Label(window, text="Draw Pile:")
-draw_pile_label.pack()
-discard_pile_label = tk.Label(window, text="Current Game Card:")
-discard_pile_label.pack()
+            random_card_label.pack_forget()
+            random_card_name_label.pack()
+            draw_button.pack_forget()
+
+            player_decks[0].append(card)
+            card_image = card_images[card]
+            card_label = tk.Label(player_frames[0], image=card_image)
+            card_label.pack(side="left")
+    #for the else case, if there are no more cards in the draw pile, we need to move all the cards from the discard pile
+    # except the top card to the draw pile, and then shuffle it, and then draw from it
+    else:
 
 
 def deal_cards():
@@ -106,6 +123,12 @@ def deal_cards():
     number_players = int(number_players_var.get())
     player_decks = [[] for _ in range(number_players)]
     initialize_piles()
+
+    draw_pile_label = tk.Label(window, text=f"Draw Pile: {len(draw_pile)}")
+    draw_pile_label.pack()
+
+    discard_pile_label = tk.Label(window, text="Current Game Card")
+    discard_pile_label.pack()
 
     for i in range(7):
         for j in range(number_players):
@@ -135,6 +158,7 @@ def deal_cards():
 
     window.update()
 
+    #we need to write a function after the turn window closes that can keep track of whose turn it is
     turn_window = tk.Toplevel(window)
     turn_window.title("Player Turn")
     starting_player = random.randint(1, number_players)
