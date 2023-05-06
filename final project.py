@@ -37,50 +37,23 @@ card_images = {}
 
 for color in colors:
     for number in numbers[1:]:
-        image_path = f"/Users/josephinechen/PycharmProjects/pythonProject/CLPS950_FinalProject_Cards copy/{color}_{number}.png"
+        image_path = f"/Users/josephinechen/PycharmProjects/pythonProject/CLPS950_FinalProject_Cards/{number}{color}.png"
         card_image = Image.open(image_path)
         card_image = card_image.resize((100, 140))
-        card_images[f"{number}_{color}"] = ImageTk.PhotoImage(card_image)
+        card_images[f"{number}{color}"] = ImageTk.PhotoImage(card_image)
 
     for action_card in action_cards:
-        image_path = f"/Users/josephinechen/PycharmProjects/pythonProject/CLPS950_FinalProject_Cards copy/{color}_{action_card}.png"
+        image_path = f"/Users/josephinechen/PycharmProjects/pythonProject/CLPS950_FinalProject_Cards/{action_card}{color}.png"
         card_image = Image.open(image_path)
         card_image = card_image.resize((100, 140))
-        card_images[f"{action_card}_{color}"] = ImageTk.PhotoImage(card_image)
+        card_images[f"{action_card}{color}"] = ImageTk.PhotoImage(card_image)
 
     for wild_card in wild_cards:
-        image_path = f"/Users/josephinechen/PycharmProjects/pythonProject/CLPS950_FinalProject_Cards copy/{wild_card}.png"
+        image_path = f"/Users/josephinechen/PycharmProjects/pythonProject/CLPS950_FinalProject_Cards/{wild_card}.png"
         card_image = Image.open(image_path)
         card_image = card_image.resize((100, 140))
-        card_images[wild_card] = ImageTk.PhotoImage(card_image)
+        card_images[f"{wild_card}"] = ImageTk.PhotoImage(card_image)
 
-def customize_rules():
-    global allow_stacking, force_play
-    allow_stacking_var = tk.StringVar(window, "yes")
-    allow_stacking_label = tk.Label(window, text="Allow Stacking of Draw2 and Draw4 Cards?")
-    allow_stacking_dropdown = tk.OptionMenu(window, allow_stacking_var, "yes", "no")
-    allow_stacking_label.pack(side="left")
-    allow_stacking_dropdown.pack(side="left")
-
-    force_play_var = tk.StringVar(window, "yes")
-    force_play_label = tk.Label(window, text="Force Players to Play if they have a Playable Card?")
-    force_play_dropdown = tk.OptionMenu(window, force_play_var, "yes", "no")
-    force_play_label.pack(side="left")
-    force_play_dropdown.pack(side="left")
-
-    allow_stacking = False
-
-    def save_rules():
-        global allow_stacking, force_play
-        #nonlocal allow_stacking, force_play
-        allow_stacking = allow_stacking_var.get() == "yes"
-        force_play = force_play_var.get() == "yes"
-        rules_window.destroy()
-
-    save_button = tk.Button(rules_window, text="Save", command=save_rules)
-    save_button.pack()
-
-    rules_window.mainloop()
 
 def deal_cards():
     global number_players, player_decks, deck
@@ -97,26 +70,66 @@ def deal_cards():
                 discard_pile.clear()
                 player_decks[j].append(deck.pop())
 
+    # Display the player's hand in the GUI
+    for i in range(number_players):
+        player_frame = tk.Frame(window)
+        player_frame.pack()
+        player_label = tk.Label(player_frame, text=f"Player {i+1}'s hand:")
+        player_label.pack(side="left")
+
+        for card in player_decks[i]:
+            card_image = card_images[card]
+            card_label = tk.Label(player_frame, image=card_image)
+            card_label.pack(side="left")
+
+    window.update()
+
+
+def customize_rules():
+    global allow_stacking, force_play, rules_window
+    rules_window = tk.Toplevel(window)
+
+    allow_stacking_var = tk.StringVar(rules_window, "yes")
+    allow_stacking_label = tk.Label(rules_window, text="Allow Stacking of Draw2 and Draw4 Cards?")
+    allow_stacking_dropdown = tk.OptionMenu(rules_window, allow_stacking_var, "yes", "no")
+    allow_stacking_label.pack(side="left")
+    allow_stacking_dropdown.pack(side="left")
+
+    force_play_var = tk.StringVar(rules_window, "yes")
+    force_play_label = tk.Label(rules_window, text="Force Players to Play if they have a Playable Card?")
+    force_play_dropdown = tk.OptionMenu(rules_window, force_play_var, "yes", "no")
+    force_play_label.pack(side="left")
+    force_play_dropdown.pack(side="left")
+
+    allow_stacking = False
+
+    def save_rules():
+        global allow_stacking, force_play
+        allow_stacking = allow_stacking_var.get() == "yes"
+        force_play = force_play_var.get() == "yes"
+        rules_window.destroy()
+        deal_cards()
+
+    save_button = tk.Button(rules_window, text="Save", command=save_rules)
+    save_button.pack()
+
+    rules_window.mainloop()
+
+
 def quit_game():
     window.destroy()
 
 def select_number_players():
+    global number_players
     number_players = int(number_players_var.get())
     if number_players == 1:
         ai_label = tk.Label(window, text = "Playing Against AI")
         ai_label.pack()
     elif number_players in range(2,6):
         customize_rules()
-        deal_cards()
+    deal_cards()
+
+start_option = tk.Button(window,text="Start Game", command=select_number_players)
+start_option.pack()
 
 window.mainloop()
-
-
-
-
-
-
-
-
-
-
