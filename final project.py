@@ -33,6 +33,25 @@ number_players_dropdown = tk.OptionMenu(window, number_players_var, "1","2","3",
 number_players_label.pack(side="left")
 number_players_dropdown.pack(side="left")
 
+def update_draw_pile():
+    draw_pile_count_label.config(text=f"Draw Pile: {len(draw_pile)}")
+
+def update_discard_pile():
+    if discard_pile:
+        top_card = discard_pile[-1]
+        card_image = card_images[top_card]
+        discard_pile_label.config(image=card_image)
+        discard_pile_label.image = card_image
+
+def initialize_piles():
+    global draw_pile, discard_pile
+    draw_pile = list(card_images.keys())
+    random.shuffle(draw_pile)
+    discard_pile = [draw_pile.pop()]
+
+    update_draw_pile()
+    update_discard_pile()
+
 card_images = {}
 
 for color in colors:
@@ -54,11 +73,22 @@ for color in colors:
         card_image = card_image.resize((100, 140))
         card_images[f"{wild_card}"] = ImageTk.PhotoImage(card_image)
 
+draw_pile_label = tk.Label(window, text = "Draw Pile:")
+discard_pile_label = tk.Label(window, text = "Discard Pile:")
+
+def draw_random_card():
+    if draw_pile:
+        random_card = random.choice(draw_pile)
+        card_image = card_images[random_card]
+
+        random_card_label = tk.Label(window, image = card_image)
+        random_card_label.pack()
 
 def deal_cards():
     global number_players, player_decks, deck
     number_players = int(number_players_var.get())
     player_decks = [[] for _ in range(number_players)]
+    initialize_piles()
 
     for i in range(7):
         for j in range(number_players):
@@ -93,6 +123,7 @@ def deal_cards():
     starting_player = random.randint(1, number_players)
     starting_player_label = tk.Label(turn_window, text=f"Player {starting_player} can start!")
     starting_player_label.pack()
+    window.after(3000, draw_random_card)
     turn_window.after(3000, starting_player_label.destroy)
     turn_window.after(3000,turn_window.destroy)
 
