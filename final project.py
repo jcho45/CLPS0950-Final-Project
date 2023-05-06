@@ -37,19 +37,19 @@ card_images = {}
 
 for color in colors:
     for number in numbers[1:]:
-        image_path = f"/Users/josephinechen/PycharmProjects/pythonProject/CLPS950_FinalProject_Cards/{number}{color}.png"
+        image_path = f"/Users/jacquelinecho/PycharmProjects/CLPS0950-Final-Project/CLPS950_FinalProject_Cards/{number}{color}.png"
         card_image = Image.open(image_path)
         card_image = card_image.resize((100, 140))
         card_images[f"{number}{color}"] = ImageTk.PhotoImage(card_image)
 
     for action_card in action_cards:
-        image_path = f"/Users/josephinechen/PycharmProjects/pythonProject/CLPS950_FinalProject_Cards/{action_card}{color}.png"
+        image_path = f"/Users/jacquelinecho/PycharmProjects/CLPS0950-Final-Project/CLPS950_FinalProject_Cards/{action_card}{color}.png"
         card_image = Image.open(image_path)
         card_image = card_image.resize((100, 140))
         card_images[f"{action_card}{color}"] = ImageTk.PhotoImage(card_image)
 
     for wild_card in wild_cards:
-        image_path = f"/Users/josephinechen/PycharmProjects/pythonProject/CLPS950_FinalProject_Cards/{wild_card}.png"
+        image_path = f"/Users/jacquelinecho/PycharmProjects/CLPS0950-Final-Project/CLPS950_FinalProject_Cards/{wild_card}.png"
         card_image = Image.open(image_path)
         card_image = card_image.resize((100, 140))
         card_images[f"{wild_card}"] = ImageTk.PhotoImage(card_image)
@@ -70,6 +70,10 @@ def deal_cards():
                 discard_pile.clear()
                 player_decks[j].append(deck.pop())
 
+    start_option.destroy()
+    number_players_label.destroy()
+    number_players_dropdown.destroy()
+
     # Display the player's hand in the GUI
     for i in range(number_players):
         player_frame = tk.Frame(window)
@@ -84,6 +88,13 @@ def deal_cards():
 
     window.update()
 
+    turn_window = tk.Toplevel(window)
+    turn_window.title("Player Turn")
+    starting_player = random.randint(1, number_players)
+    starting_player_label = tk.Label(turn_window, text=f"Player {starting_player} can start!")
+    starting_player_label.pack()
+    turn_window.after(3000, starting_player_label.destroy)
+    turn_window.after(3000,turn_window.destroy)
 
 def customize_rules():
     global allow_stacking, force_play, rules_window
