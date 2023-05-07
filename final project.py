@@ -23,6 +23,7 @@ player_decks = []
 number_players = 1
 draw_pile = []
 discard_pile = []
+player_turn_label = None
 
 window = tk.Tk()
 window.title("UNAS AMIGAS")
@@ -32,6 +33,13 @@ number_players_label = tk.Label(window, text="Number of Players:")
 number_players_dropdown = tk.OptionMenu(window, number_players_var, "1","2","3","4","5")
 number_players_label.pack(side="left")
 number_players_dropdown.pack(side="left")
+
+current_player = 0
+current_card = ""
+current_color = ""
+draw_count = 0
+reverse = False
+skip = False
 
 def update_draw_pile():
     global draw_pile_label, draw_pile
@@ -45,35 +53,48 @@ def update_discard_pile():
         discard_text = f"Current Game Card: {top_card}"
         discard_pile_label.config(image=card_image, text=discard_text)
         discard_pile_label.image = card_image
-        discard_pile_label.config(text="Current Game Card")
+
+def update_current_player_label():
+    global current_player, player_labels, player_turn_label
+    for i in range(number_players):
+        if i == current_player:
+            player_labels[i].config(text=f"Player {i+1}'s turn")
+        else:
+            player_labels[i].config(text=f"Player {i+1}")
+    player_turn_label.config(text=f"Player {current_player+1}'s turn")
+
 
 
 def initialize_piles():
-    global draw_pile, discard_pile
+    global draw_pile, discard_pile, player_turn_label
     draw_pile = list(deck)
     random.shuffle(draw_pile)
     discard_pile = [draw_pile.pop()]
 
+    player_turn_label = tk.Label(window, text=f"Player 1's turn")
+    player_turn_label.pack()
+
     update_draw_pile()
     update_discard_pile()
+
 
 card_images = {}
 
 for color in colors:
     for number in numbers[1:]:
-        image_path = f"/Users/jacquelinecho/PycharmProjects/CLPS0950-Final-Project/CLPS950_FinalProject_Cards/{number}{color}.png"
+        image_path = f"/Users/josephinechen/PycharmProjects/CLPS0950-Final-Project/CLPS950_FinalProject_Cards/{number}{color}.png"
         card_image = Image.open(image_path)
         card_image = card_image.resize((100, 140))
         card_images[f"{number}{color}"] = ImageTk.PhotoImage(card_image)
 
     for action_card in action_cards:
-        image_path = f"/Users/jacquelinecho/PycharmProjects/CLPS0950-Final-Project/CLPS950_FinalProject_Cards/{action_card}{color}.png"
+        image_path = f"/Users/josephinechen/PycharmProjects/CLPS0950-Final-Project/CLPS950_FinalProject_Cards/{action_card}{color}.png"
         card_image = Image.open(image_path)
         card_image = card_image.resize((100, 140))
         card_images[f"{action_card}{color}"] = ImageTk.PhotoImage(card_image)
 
     for wild_card in wild_cards:
-        image_path = f"/Users/jacquelinecho/PycharmProjects/CLPS0950-Final-Project/CLPS950_FinalProject_Cards/{wild_card}.png"
+        image_path = f"/Users/josephinechen/PycharmProjects/CLPS0950-Final-Project/CLPS950_FinalProject_Cards/{wild_card}.png"
         card_image = Image.open(image_path)
         card_image = card_image.resize((100, 140))
         card_images[f"{wild_card}"] = ImageTk.PhotoImage(card_image)
@@ -84,8 +105,11 @@ draw_pile_label.pack()
 discard_pile_label = tk.Label(window, text="Current Game Card")
 discard_pile_label.pack()
 
+
+player_labels = []
+
 def draw_random_card():
-    global draw_pile, discard_pile, card_images
+    global draw_pile, discard_pile, card_images, current_player, draw_count
 
     if draw_pile:
         random_card = random.choice(draw_pile)
@@ -119,7 +143,7 @@ def draw_random_card():
 
 
 def deal_cards():
-    global number_players, player_decks, deck
+    global number_players, player_decks, deck, player_labels
     number_players = int(number_players_var.get())
     player_decks = [[] for _ in range(number_players)]
     initialize_piles()
@@ -145,18 +169,48 @@ def deal_cards():
     number_players_dropdown.destroy()
 
     # Display the player's hand in the GUI
+    player_frames = []
+    player_labels = []
+    player_turn_label = None
+
     for i in range(number_players):
         player_frame = tk.Frame(window)
         player_frame.pack()
         player_label = tk.Label(player_frame, text=f"Player {i+1}'s hand:")
         player_label.pack(side="left")
+        player_labels.append(player_label)
 
         for card in player_decks[i]:
             card_image = card_images[card]
             card_label = tk.Label(player_frame, image=card_image)
             card_label.pack(side="left")
 
+        player_frames.append(player_frame)
+
     window.update()
+
+def update_turn():
+    global current_player
+    current_player = (current_player +1) %number_players
+    player_turn_label.config(text=f"Player {current_player + 1}'s turn")
+    #draw_random_card()
+
+def end_turn():
+    update_turn()
+    player_turn_label.config(text=f"Player {current_player + 1}'s turn")
+    #draw_random_card()
+
+
+    def start_game():
+        global current_player, current_card, current_color, draw_count, skip, reverse, player_decks, number_players, turn_window
+        turn_window = tk.Toplevel()
+        turn_window.title("UNAS AMIGAS")
+        turn_window.destroy()
+        update_turn()
+        #draw_random_card()
+
+    start_game_button = tk.Button(turn_window, text="Start Game", command=start_game)
+    start_game_button.pack()
 
     #we need to write a function after the turn window closes that can keep track of whose turn it is
     turn_window = tk.Toplevel(window)
@@ -167,6 +221,15 @@ def deal_cards():
     window.after(3000, draw_random_card)
     turn_window.after(3000, starting_player_label.destroy)
     turn_window.after(3000,turn_window.destroy)
+
+def end_turn():
+    #Perform any necessary turn-related actions here
+    update_turn()
+    player_turn_label.config(text=f"Player {current_player + 1}'s turn")
+    #draw_random_card()
+
+end_turn_button = tk.Button(window, text="End Turn", command=end_turn)
+end_turn_button.pack()
 
 def customize_rules():
     global allow_stacking, force_play, rules_window
@@ -216,3 +279,4 @@ start_option = tk.Button(window,text="Start Game", command=select_number_players
 start_option.pack()
 
 window.mainloop()
+
