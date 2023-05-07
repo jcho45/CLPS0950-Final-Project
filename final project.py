@@ -98,8 +98,8 @@ def draw_random_card():
         random_card_name_label.pack()
 
         #tried to make a draw button next to the draw pile so when a player clicks it, a card is drawn and added to their deck
-        draw_button = tk.Button(window, text="Draw", command=lambda card=random_card: draw(card))
-        draw_button.pack()
+        #draw_button = tk.Button(window, text="Draw", command=lambda card=random_card: draw(card))
+        #draw_button.pack()
 
         def draw(card):
             draw_pile.remove(card)
@@ -115,7 +115,7 @@ def draw_random_card():
             card_label.pack(side="left")
     #for the else case, if there are no more cards in the draw pile, we need to move all the cards from the discard pile
     # except the top card to the draw pile, and then shuffle it, and then draw from it
-    else:
+    #else:
 
 
 def deal_cards():
