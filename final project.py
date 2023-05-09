@@ -2,284 +2,208 @@ import random
 import tkinter as tk
 from PIL import Image, ImageTk
 
-colors = ["red", "yellow", "green", "blue"]
-numbers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-action_cards = ["skip", "reverse", "draw2"]
-wild_cards = ["wild", "wild4"]
-flipped_card = ["black"]
 
-deck = []
-for color_type in colors:
-   for number_type in numbers[1:]:
-       deck.append(str(number_type)+""+color_type)
-   for action_card_type in action_cards:
-        deck.append(action_card_type +""+color_type)
-   for wild_card_type in wild_cards:
-        deck.append(wild_card_type)
-
-random.shuffle(deck)
-
-player_decks = []
-number_players = 1
-draw_pile = []
-discard_pile = []
-player_turn_label = None
-
-window = tk.Tk()
-window.title("UNAS AMIGAS")
-
-number_players_var = tk.StringVar(window,"1")
-number_players_label = tk.Label(window, text="Number of Players:")
-number_players_dropdown = tk.OptionMenu(window, number_players_var, "1","2","3","4","5")
-number_players_label.pack(side="left")
-number_players_dropdown.pack(side="left")
-
-current_player = 0
-current_card = ""
-current_color = ""
-draw_count = 0
-reverse = False
-skip = False
-
-def update_draw_pile():
-    global draw_pile_label, draw_pile
-    draw_pile_label.config(text=f"Draw Pile: {len(draw_pile)}")
-
-def update_discard_pile():
-    global discard_pile_label
-    if discard_pile:
-        top_card = discard_pile[-1]
-        card_image = card_images[top_card]
-        discard_text = f"Current Game Card: {top_card}"
-        discard_pile_label.config(image=card_image, text=discard_text)
-        discard_pile_label.image = card_image
-
-def update_current_player_label():
-    global current_player, player_labels, player_turn_label
-    for i in range(number_players):
-        if i == current_player:
-            player_labels[i].config(text=f"Player {i+1}'s turn")
-        else:
-            player_labels[i].config(text=f"Player {i+1}")
-    player_turn_label.config(text=f"Player {current_player+1}'s turn")
+class UNOGame:
+   def __init__(self):
+       self.colors = ["red", "yellow", "green", "blue"]
+       self.numbers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+       self.action_cards = ["skip", "reverse", "draw2"]
+       self.wild_cards = ["wild", "wild4"]
 
 
-
-def initialize_piles():
-    global draw_pile, discard_pile, player_turn_label
-    draw_pile = list(deck)
-    random.shuffle(draw_pile)
-    discard_pile = [draw_pile.pop()]
-
-    player_turn_label = tk.Label(window, text=f"Player 1's turn")
-    player_turn_label.pack()
-
-    update_draw_pile()
-    update_discard_pile()
+       self.deck = []
+       for color_type in self.colors:
+           for number_type in self.numbers:
+               self.deck.append(str(number_type) + "" + color_type)
+           for action_card_type in self.action_cards:
+               self.deck.append(action_card_type + "" + color_type)
+       for wild_card_type in self.wild_cards:
+           self.deck.append(wild_card_type)
 
 
-card_images = {}
-
-for color in colors:
-    for number in numbers[1:]:
-        image_path = f"/Users/josephinechen/PycharmProjects/CLPS0950-Final-Project/CLPS950_FinalProject_Cards/{number}{color}.png"
-        card_image = Image.open(image_path)
-        card_image = card_image.resize((100, 140))
-        card_images[f"{number}{color}"] = ImageTk.PhotoImage(card_image)
-
-    for action_card in action_cards:
-        image_path = f"/Users/josephinechen/PycharmProjects/CLPS0950-Final-Project/CLPS950_FinalProject_Cards/{action_card}{color}.png"
-        card_image = Image.open(image_path)
-        card_image = card_image.resize((100, 140))
-        card_images[f"{action_card}{color}"] = ImageTk.PhotoImage(card_image)
-
-    for wild_card in wild_cards:
-        image_path = f"/Users/josephinechen/PycharmProjects/CLPS0950-Final-Project/CLPS950_FinalProject_Cards/{wild_card}.png"
-        card_image = Image.open(image_path)
-        card_image = card_image.resize((100, 140))
-        card_images[f"{wild_card}"] = ImageTk.PhotoImage(card_image)
-
-draw_pile_label = tk.Label(window, text=f"Draw Pile: {len(draw_pile)}")
-draw_pile_label.pack()
-
-discard_pile_label = tk.Label(window, text="Current Game Card")
-discard_pile_label.pack()
+       random.shuffle(self.deck)
 
 
-player_labels = []
-
-def draw_random_card():
-    global draw_pile, discard_pile, card_images, current_player, draw_count
-
-    if draw_pile:
-        random_card = random.choice(draw_pile)
-        card_image = card_images[random_card]
-
-        random_card_label = tk.Label(window, image=card_image)
-        random_card_label.pack()
-
-        random_card_name_label = tk.Label(window, text=random_card)
-        random_card_name_label.pack()
-
-        #tried to make a draw button next to the draw pile so when a player clicks it, a card is drawn and added to their deck
-        #draw_button = tk.Button(window, text="Draw", command=lambda card=random_card: draw(card))
-        #draw_button.pack()
-
-        def draw(card):
-            draw_pile.remove(card)
-            update_draw_pile()
-
-            random_card_label.pack_forget()
-            random_card_name_label.pack()
-            draw_button.pack_forget()
-
-            player_decks[0].append(card)
-            card_image = card_images[card]
-            card_label = tk.Label(player_frames[0], image=card_image)
-            card_label.pack(side="left")
-    #for the else case, if there are no more cards in the draw pile, we need to move all the cards from the discard pile
-    # except the top card to the draw pile, and then shuffle it, and then draw from it
-    #else:
+       self.number_players = 1
+       self.draw_pile = []
+       self.discard_pile = []
+       self.player_turn_label = None
+       self.player_frames = []
+       self.current_player = 1  # Variable to keep track of the current player's turn
 
 
-def deal_cards():
-    global number_players, player_decks, deck, player_labels
-    number_players = int(number_players_var.get())
-    player_decks = [[] for _ in range(number_players)]
-    initialize_piles()
-
-    draw_pile_label = tk.Label(window, text=f"Draw Pile: {len(draw_pile)}")
-    draw_pile_label.pack()
-
-    discard_pile_label = tk.Label(window, text="Current Game Card")
-    discard_pile_label.pack()
-
-    for i in range(7):
-        for j in range(number_players):
-            if deck:
-                player_decks[j].append(deck.pop())
-            else:
-                deck = list(discard_pile)
-                random.shuffle(deck)
-                discard_pile.clear()
-                player_decks[j].append(deck.pop())
-
-    start_option.destroy()
-    number_players_label.destroy()
-    number_players_dropdown.destroy()
-
-    # Display the player's hand in the GUI
-    player_frames = []
-    player_labels = []
-    player_turn_label = None
-
-    for i in range(number_players):
-        player_frame = tk.Frame(window)
-        player_frame.pack()
-        player_label = tk.Label(player_frame, text=f"Player {i+1}'s hand:")
-        player_label.pack(side="left")
-        player_labels.append(player_label)
-
-        for card in player_decks[i]:
-            card_image = card_images[card]
-            card_label = tk.Label(player_frame, image=card_image)
-            card_label.pack(side="left")
-
-        player_frames.append(player_frame)
-
-    window.update()
-
-def update_turn():
-    global current_player
-    current_player = (current_player +1) %number_players
-    player_turn_label.config(text=f"Player {current_player + 1}'s turn")
-    #draw_random_card()
-
-def end_turn():
-    update_turn()
-    player_turn_label.config(text=f"Player {current_player + 1}'s turn")
-    #draw_random_card()
+       self.window = tk.Tk()
+       self.window.title("UNAS AMIGAS")
 
 
-    def start_game():
-        global current_player, current_card, current_color, draw_count, skip, reverse, player_decks, number_players, turn_window
-        turn_window = tk.Toplevel()
-        turn_window.title("UNAS AMIGAS")
-        turn_window.destroy()
-        update_turn()
-        #draw_random_card()
-
-    start_game_button = tk.Button(turn_window, text="Start Game", command=start_game)
-    start_game_button.pack()
-
-    #we need to write a function after the turn window closes that can keep track of whose turn it is
-    turn_window = tk.Toplevel(window)
-    turn_window.title("Player Turn")
-    starting_player = random.randint(1, number_players)
-    starting_player_label = tk.Label(turn_window, text=f"Player {starting_player} can start!")
-    starting_player_label.pack()
-    window.after(3000, draw_random_card)
-    turn_window.after(3000, starting_player_label.destroy)
-    turn_window.after(3000,turn_window.destroy)
-
-def end_turn():
-    #Perform any necessary turn-related actions here
-    update_turn()
-    player_turn_label.config(text=f"Player {current_player + 1}'s turn")
-    #draw_random_card()
-
-end_turn_button = tk.Button(window, text="End Turn", command=end_turn)
-end_turn_button.pack()
-
-def customize_rules():
-    global allow_stacking, force_play, rules_window
-    rules_window = tk.Toplevel(window)
-
-    allow_stacking_var = tk.StringVar(rules_window, "yes")
-    allow_stacking_label = tk.Label(rules_window, text="Allow Stacking of Draw2 and Draw4 Cards?")
-    allow_stacking_dropdown = tk.OptionMenu(rules_window, allow_stacking_var, "yes", "no")
-    allow_stacking_label.pack(side="left")
-    allow_stacking_dropdown.pack(side="left")
-
-    force_play_var = tk.StringVar(rules_window, "yes")
-    force_play_label = tk.Label(rules_window, text="Force Players to Play if they have a Playable Card?")
-    force_play_dropdown = tk.OptionMenu(rules_window, force_play_var, "yes", "no")
-    force_play_label.pack(side="left")
-    force_play_dropdown.pack(side="left")
-
-    allow_stacking = False
-
-    def save_rules():
-        global allow_stacking, force_play
-        allow_stacking = allow_stacking_var.get() == "yes"
-        force_play = force_play_var.get() == "yes"
-        rules_window.destroy()
-        deal_cards()
-
-    save_button = tk.Button(rules_window, text="Save", command=save_rules)
-    save_button.pack()
-
-    rules_window.mainloop()
+       self.number_players_var = tk.StringVar(self.window, "1")
+       self.number_players_label = tk.Label(self.window, text="Number of Players:")
+       self.number_players_dropdown = tk.OptionMenu(self.window, self.number_players_var, "1", "2", "3", "4", "5")
+       self.number_players_label.pack(side="left")
+       self.number_players_dropdown.pack(side="left")
 
 
-def quit_game():
-    window.destroy()
+       self.start_option = tk.Button(self.window, text="Start Game", command=self.select_number_players)
+       self.start_option.pack()
 
-def select_number_players():
-    global number_players
-    number_players = int(number_players_var.get())
-    if number_players == 1:
-        ai_label = tk.Label(window, text = "Playing Against AI")
-        ai_label.pack()
-    elif number_players in range(2,6):
-        customize_rules()
-    deal_cards()
 
-start_option = tk.Button(window,text="Start Game", command=select_number_players)
-start_option.pack()
+       self.card_images = {}
 
-window.mainloop()
 
+       for color in self.colors:
+           for number in self.numbers:
+               image_path = f"/Users/jacquelinecho/PycharmProjects/CLPSFinalProject/CLPS950_FinalProject_Cards/{number}{color}.png"
+               card_image = Image.open(image_path)
+               card_image = card_image.resize((50, 70))
+               self.card_images[f"{number}{color}"] = ImageTk.PhotoImage(card_image)
+
+
+           for action_card in self.action_cards:
+               image_path = f"/Users/jacquelinecho/PycharmProjects/CLPSFinalProject/CLPS950_FinalProject_Cards/{action_card}{color}.png"
+               card_image = Image.open(image_path)
+               card_image = card_image.resize((50, 70))
+               self.card_images[f"{action_card}{color}"] = ImageTk.PhotoImage(card_image)
+
+
+       for wild_card in self.wild_cards:
+           image_path = f"/Users/jacquelinecho/PycharmProjects/CLPSFinalProject/CLPS950_FinalProject_Cards/{wild_card}.png"
+           card_image = Image.open(image_path)
+           card_image = card_image.resize((50, 70))
+           self.card_images[f"{wild_card}"] = ImageTk.PhotoImage(card_image)
+
+
+       self.window.mainloop()
+
+
+   def deal_cards(self):
+       self.player_decks = [[] for _ in range(self.number_players)]
+       self.initialize_piles()
+
+
+       self.draw_pile_label = tk.Label(self.window, text=f"Draw Pile: {len(self.draw_pile)}")
+       self.draw_pile_label.pack()
+
+
+       self.discard_pile_label = tk.Label(self.window, text="Current Game Card")
+       self.discard_pile_label.pack()
+
+
+       self.player_labels = []
+
+
+       for i in range(self.number_players):
+           player_frame = tk.Frame(self.window)
+           player_frame.pack()
+           player_label = tk.Label(player_frame, text=f"Player {i + 1}'s hand:")
+           player_label.pack(side="left")
+           self.player_labels.append(player_label)
+
+
+           # Deal 7 cards to each player
+           cards_to_deal = 7
+           if i == 0:
+               cards_to_deal -= 1  # Subtract an extra card for the first player
+           for _ in range(cards_to_deal):
+               card = self.draw_pile.pop()
+               self.player_decks[i].append(card)
+               card_image = self.card_images[card]
+               card_label = tk.Label(player_frame, image=card_image)
+               card_label.pack(side="left")
+
+
+           self.player_frames.append(player_frame)
+
+
+       self.window.update()
+       self.start()
+
+
+   def initialize_piles(self):
+       self.draw_pile = list(self.deck)
+       random.shuffle(self.draw_pile)
+       self.discard_pile = [self.draw_pile.pop()]
+
+
+       self.player_turn_label = tk.Label(self.window, text=f"Player 1's turn")
+       self.player_turn_label.pack()
+       self.draw_pile_label = tk.Label(self.window, text=f"Draw Pile: {len(self.draw_pile)}")
+       self.draw_pile_label.pack()
+
+
+       self.discard_pile_label = tk.Label(self.window)
+       self.discard_pile_label.pack()
+
+       self.update_discard_pile()
+
+   def update_discard_pile(self):
+       if self.discard_pile:
+           top_card = self.discard_pile[-1]
+           card_image = self.card_images[top_card]
+           self.discard_pile_label.config(image=card_image)
+           self.discard_pile_label.image = card_image
+
+   def start(self):
+       self.draw_button = tk.Button(self.window, text="Draw", command=self.draw_random_card)
+       self.draw_button.pack()
+       self.draw_random_card()
+       self.end_turn_button = tk.Button(self.window, text="End Turn", command=self.end_turn)
+       self.end_turn_button.pack()
+
+       # Hide all player frames except the current player's frame
+       for i, frame in enumerate(self.player_frames):
+           if i == self.current_player - 1:
+               frame.pack()
+           else:
+               frame.pack_forget()
+
+   def select_number_players(self):
+       self.number_players = int(self.number_players_var.get())
+       if self.number_players == 1:
+           ai_label = tk.Label(self.window, text="Playing Against AI")
+           ai_label.pack()
+       elif self.number_players in range(2, 6):
+           self.deal_cards()
+
+
+       self.start_option.destroy()
+       self.number_players_label.pack_forget()
+       self.number_players_dropdown.pack_forget()
+
+
+   def update_draw_pile(self):
+       self.draw_pile_label.config(text=f"Draw Pile: {len(self.draw_pile)}")
+
+
+   def draw_random_card(self):
+       if self.draw_pile:
+           random_card = random.choice(self.draw_pile)
+           card_image = self.card_images[random_card]
+
+
+           self.draw_pile.remove(random_card)
+           self.update_draw_pile()
+
+
+           self.player_decks[self.current_player - 1].append(random_card)
+           card_label = tk.Label(self.player_frames[self.current_player - 1], image=card_image)
+           card_label.pack(side="left")
+       else:
+           pass  # Handle case when draw pile is empty
+
+   def end_turn(self):
+       self.current_player = (self.current_player % self.number_players) + 1
+       self.player_turn_label.config(text=f"Player {self.current_player}'s turn")
+
+       # Update the visibility of player frames
+       for i, frame in enumerate(self.player_frames):
+           if i == self.current_player - 1:
+               frame.pack()
+           else:
+               frame.pack_forget()
+
+
+if __name__ == "__main__":
+   uno_game = UNOGame()
 
 
 
