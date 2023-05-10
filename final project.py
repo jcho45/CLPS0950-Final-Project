@@ -2,14 +2,12 @@ import random
 import tkinter as tk
 from PIL import Image, ImageTk
 
-
 class UNOGame:
    def __init__(self):
        self.colors = ["red", "yellow", "green", "blue"]
        self.numbers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
        self.action_cards = ["skip", "reverse", "draw2"]
        self.wild_cards = ["wild", "wild4"]
-
 
        self.deck = []
        for color_type in self.colors:
@@ -38,7 +36,7 @@ class UNOGame:
 
        self.number_players_var = tk.StringVar(self.window, "1")
        self.number_players_label = tk.Label(self.window, text="Number of Players:")
-       self.number_players_dropdown = tk.OptionMenu(self.window, self.number_players_var, "1", "2", "3", "4", "5")
+       self.number_players_dropdown = tk.OptionMenu(self.window, self.number_players_var, "2", "3", "4", "5", "6")
        self.number_players_label.pack(side="left")
        self.number_players_dropdown.pack(side="left")
 
@@ -52,25 +50,24 @@ class UNOGame:
 
        for color in self.colors:
            for number in self.numbers:
-               image_path = f"/Users/jacquelinecho/PycharmProjects/CLPSFinalProject/CLPS950_FinalProject_Cards/{number}{color}.png"
+               image_path = f"//Users/josephinechen/PycharmProjects/CLPS0950-Final-Project/CLPS950_FinalProject_Cards/{number}{color}.png"
                card_image = Image.open(image_path)
                card_image = card_image.resize((50, 70))
                self.card_images[f"{number}{color}"] = ImageTk.PhotoImage(card_image)
 
 
            for action_card in self.action_cards:
-               image_path = f"/Users/jacquelinecho/PycharmProjects/CLPSFinalProject/CLPS950_FinalProject_Cards/{action_card}{color}.png"
+               image_path = f"/Users/josephinechen/PycharmProjects/CLPS0950-Final-Project/CLPS950_FinalProject_Cards/{action_card}{color}.png"
                card_image = Image.open(image_path)
                card_image = card_image.resize((50, 70))
                self.card_images[f"{action_card}{color}"] = ImageTk.PhotoImage(card_image)
 
 
        for wild_card in self.wild_cards:
-           image_path = f"/Users/jacquelinecho/PycharmProjects/CLPSFinalProject/CLPS950_FinalProject_Cards/{wild_card}.png"
+           image_path = f"/Users/josephinechen/PycharmProjects/CLPS0950-Final-Project/CLPS950_FinalProject_Cards/{wild_card}.png"
            card_image = Image.open(image_path)
            card_image = card_image.resize((50, 70))
            self.card_images[f"{wild_card}"] = ImageTk.PhotoImage(card_image)
-
 
        self.window.mainloop()
 
@@ -79,14 +76,12 @@ class UNOGame:
        self.player_decks = [[] for _ in range(self.number_players)]
        self.initialize_piles()
 
-
-       self.draw_pile_label = tk.Label(self.window, text=f"Draw Pile: {len(self.draw_pile)}")
+       self.draw_pile_label = tk.Label(self.window)
+       self.update_draw_pile()
        self.draw_pile_label.pack()
 
-
-       self.discard_pile_label = tk.Label(self.window, text="Current Game Card")
+       self.discard_pile_label = tk.Label(self.window)
        self.discard_pile_label.pack()
-
 
        self.player_labels = []
 
@@ -113,7 +108,6 @@ class UNOGame:
 
            self.player_frames.append(player_frame)
 
-
        self.window.update()
        self.start()
 
@@ -126,10 +120,8 @@ class UNOGame:
 
        self.player_turn_label = tk.Label(self.window, text=f"Player 1's turn")
        self.player_turn_label.pack()
-       self.draw_pile_label = tk.Label(self.window, text=f"Draw Pile: {len(self.draw_pile)}")
+       self.draw_pile_label = tk.Label(self.window)
        self.draw_pile_label.pack()
-
-
        self.discard_pile_label = tk.Label(self.window)
        self.discard_pile_label.pack()
 
@@ -158,10 +150,7 @@ class UNOGame:
 
    def select_number_players(self):
        self.number_players = int(self.number_players_var.get())
-       if self.number_players == 1:
-           ai_label = tk.Label(self.window, text="Playing Against AI")
-           ai_label.pack()
-       elif self.number_players in range(2, 6):
+       if self.number_players in range(2, 6):
            self.deal_cards()
 
 
@@ -171,7 +160,7 @@ class UNOGame:
 
 
    def update_draw_pile(self):
-       self.draw_pile_label.config(text=f"Draw Pile: {len(self.draw_pile)}")
+       self.draw_pile_label.config()
 
 
    def draw_random_card(self):
