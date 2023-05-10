@@ -42,19 +42,19 @@ class UNOGame:
 
        for color in self.colors:
            for number in self.numbers:
-               image_path = f"//Users/josephinechen/PycharmProjects/CLPS0950-Final-Project/CLPS950_FinalProject_Cards/{number}{color}.png"
+               image_path = f"/Users/jacquelinecho/PycharmProjects/CLPS0950-Final-Project/CLPS950_FinalProject_Cards/{number}{color}.png"
                card_image = Image.open(image_path)
                card_image = card_image.resize((50, 70))
                self.card_images[f"{number}{color}"] = ImageTk.PhotoImage(card_image)
 
            for action_card in self.action_cards:
-               image_path = f"/Users/josephinechen/PycharmProjects/CLPS0950-Final-Project/CLPS950_FinalProject_Cards/{action_card}{color}.png"
+               image_path = f"/Users/jacquelinecho/PycharmProjects/CLPS0950-Final-Project/CLPS950_FinalProject_Cards/{action_card}{color}.png"
                card_image = Image.open(image_path)
                card_image = card_image.resize((50, 70))
                self.card_images[f"{action_card}{color}"] = ImageTk.PhotoImage(card_image)
 
        for wild_card in self.wild_cards:
-           image_path = f"/Users/josephinechen/PycharmProjects/CLPS0950-Final-Project/CLPS950_FinalProject_Cards/{wild_card}.png"
+           image_path = f"/Users/jacquelinecho/PycharmProjects/CLPS0950-Final-Project/CLPS950_FinalProject_Cards/{wild_card}.png"
            card_image = Image.open(image_path)
            card_image = card_image.resize((50, 70))
            self.card_images[f"{wild_card}"] = ImageTk.PhotoImage(card_image)
@@ -169,23 +169,18 @@ class UNOGame:
        window = tk.Toplevel(self.window)
        window.title("Play Card")
 
-       card_labels = []
-       for card in player_deck:
-           if card in valid_cards:
-               card_image = self.card_images[card]
-           else:
-               card_image = self.card_images["blank"]
-           card_label = tk.Label(window, image=card_image)
-           card_label.card = card
-           card_label.bind("<Button-1>", lambda event: window.destroy())
-           card_label.pack(side="left", padx=5)
-           card_labels.append(card_label)
+       def add_to_pile(card):
+           self.discard_pile.append(card)
+           player_deck.remove(card)
+           self.update_discard_pile()
+           window.destroy()
 
-       window.wait_window()
+       for card in valid_cards:
+           card_image = self.card_images[card]
+           card_button = tk.Button(window, image=card_image, command=lambda c=card: add_to_pile(c))
+           card_button.pack(side="left", padx=5)
 
-       for card_label in card_labels:
-           if hasattr(card_label, "selected") and card_label.selected:
-               return card_label.card
+       window.mainloop()
 
        return None  # Player closed the window without selecting a card
 
