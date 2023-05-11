@@ -30,9 +30,9 @@ class UNOGame:
        self.window = tk.Tk()
        self.window.title("UNAS AMIGAS")
 
-       self.number_players_var = tk.StringVar(self.window, "1")
+       self.number_players_var = tk.StringVar(self.window, "2")
        self.number_players_label = tk.Label(self.window, text="Number of Players:")
-       self.number_players_dropdown = tk.OptionMenu(self.window, self.number_players_var, "2", "3", "4", "5", "6")
+       self.number_players_dropdown = tk.OptionMenu(self.window, self.number_players_var, "2", "3", "4", "5")
        self.number_players_label.pack(side="left")
        self.number_players_dropdown.pack(side="left")
 
@@ -162,9 +162,28 @@ class UNOGame:
 
    def play_card(self, player_deck):
        top_card = self.discard_pile[-1]
-       valid_cards = [card for card in player_deck if card[0] == top_card[0] or card[1:] == top_card[1:]]
+       valid_cards = []
+
+       # Check if any card matches the color or number of the top card
+       for card in player_deck:
+           if card[0] == top_card[0] or card[1:] == top_card[1:]:
+               valid_cards.append(card)
+
+       # Check if any draw2, reverse, or skip card matches the color of the top card
+       for card in player_deck:
+           if card[:-1] in ["draw2", "reverse", "skip"] and card[-1] == top_card[-1]:
+               valid_cards.append(card)
+
+       # Always include any wild or wild4 card
+       valid_cards.extend([card for card in player_deck if card.startswith("wild")])
+
        if not valid_cards:
-           return None  # No valid card to play
+           no_card_window = tk.Toplevel(self.window)
+           no_card_window.title("No playable cards")
+           no_card_label = tk.Label(no_card_window, text="No playable cards: Draw Card")
+           no_card_label.pack()
+           self.window.after(2000, lambda: no_card_window.destroy())  # Close the window after 3 seconds
+           no_card_window.mainloop()
 
        window = tk.Toplevel(self.window)
        window.title("Play Card")
@@ -175,6 +194,14 @@ class UNOGame:
            self.update_discard_pile()
            window.destroy()
 
+           for widget in self.player_frames[self.current_player - 1].winfo_children():
+               widget.destroy()
+
+           for card in player_deck:
+               card_image = self.card_images[card]
+               card_label = tk.Label(self.player_frames[self.current_player - 1], image=card_image)
+               card_label.pack(side="left")
+
        for card in valid_cards:
            card_image = self.card_images[card]
            card_button = tk.Button(window, image=card_image, command=lambda c=card: add_to_pile(c))
@@ -183,6 +210,7 @@ class UNOGame:
        window.mainloop()
 
        return None  # Player closed the window without selecting a card
+
 
    def play_turn(self):
        player_deck = self.player_decks[self.current_player - 1]
@@ -194,8 +222,6 @@ class UNOGame:
        self.discard_pile.append(card_to_play)
        self.update_discard_pile()
        self.update_draw_pile()
-
-       # Handle special card effects here
 
        self.current_player = (self.current_player % self.number_players) + 1
        self.player_turn_label.config(text=f"Player {self.current_player}'s turn")
