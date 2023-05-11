@@ -1,6 +1,8 @@
 import random
 import tkinter as tk
 from PIL import Image, ImageTk
+import easygui
+from tkinter import messagebox
 
 class UNOGame:
    def __init__(self):
@@ -26,6 +28,7 @@ class UNOGame:
        self.player_turn_label = None
        self.player_frames = []
        self.current_player = 1  # Variable to keep track of the current player's turn
+       self.players = []
 
        self.window = tk.Tk()
        self.window.title("UNAS AMIGAS")
@@ -42,19 +45,19 @@ class UNOGame:
 
        for color in self.colors:
            for number in self.numbers:
-               image_path = f"/Users/jacquelinecho/PycharmProjects/CLPS0950-Final-Project/CLPS950_FinalProject_Cards/{number}{color}.png"
+               image_path = f"/Users/josephinechen/PycharmProjects/CLPS0950-Final-Project/CLPS950_FinalProject_Cards/{number}{color}.png"
                card_image = Image.open(image_path)
                card_image = card_image.resize((50, 70))
                self.card_images[f"{number}{color}"] = ImageTk.PhotoImage(card_image)
 
            for action_card in self.action_cards:
-               image_path = f"/Users/jacquelinecho/PycharmProjects/CLPS0950-Final-Project/CLPS950_FinalProject_Cards/{action_card}{color}.png"
+               image_path = f"/Users/josephinechen/PycharmProjects/CLPS0950-Final-Project/CLPS950_FinalProject_Cards/{action_card}{color}.png"
                card_image = Image.open(image_path)
                card_image = card_image.resize((50, 70))
                self.card_images[f"{action_card}{color}"] = ImageTk.PhotoImage(card_image)
 
        for wild_card in self.wild_cards:
-           image_path = f"/Users/jacquelinecho/PycharmProjects/CLPS0950-Final-Project/CLPS950_FinalProject_Cards/{wild_card}.png"
+           image_path = f"/Users/josephinechen/PycharmProjects/CLPS0950-Final-Project/CLPS950_FinalProject_Cards/{wild_card}.png"
            card_image = Image.open(image_path)
            card_image = card_image.resize((50, 70))
            self.card_images[f"{wild_card}"] = ImageTk.PhotoImage(card_image)
@@ -122,7 +125,7 @@ class UNOGame:
        self.draw_button = tk.Button(self.window, text="Draw", command=self.draw_random_card)
        self.draw_button.pack()
        self.draw_random_card()
-       self.play_button = tk.Button(self.window, text="Play Card", command=lambda: self.play_card(self.player_decks[self.current_player-1]))
+       self.play_button = tk.Button(self.window, text="Play Card", command=lambda: self.play_card(self.player_decks[self.current_player-1], self.current_player, self.discard_pile, self.deck, self.players))
        self.play_button.pack()
        self.end_turn_button = tk.Button(self.window, text="End Turn", command=self.end_turn)
        self.end_turn_button.pack()
@@ -160,19 +163,54 @@ class UNOGame:
        else:
            pass  # Handle case when draw pile is empty
 
-   def play_card(self, player_deck):
+   def ask_for_color_selection(self):
+       # create a new window
+       root = tk.Tk()
+       root.title("Color Selection")
+       root.geometry("200x150")
+
+       # create a label for instructions
+       instructions_label = tk.Label(root, text="Please select a color:")
+       instructions_label.pack(pady=10)
+
+       # create buttons for each color option
+       red_button = tk.Button(root, text="Red", bg="red", command=lambda: select_color("red"))
+       red_button.pack(pady=5)
+       green_button = tk.Button(root, text="Green", bg="green", command=lambda: select_color("green"))
+       green_button.pack(pady=5)
+       blue_button = tk.Button(root, text="Blue", bg="blue", command=lambda: select_color("blue"))
+       blue_button.pack(pady=5)
+       yellow_button = tk.Button(root, text="Yellow", bg="yellow", command=lambda: select_color("yellow"))
+       yellow_button.pack(pady=5)
+
+       # function to set the selected color and close the window
+       def select_color(color):
+           self.selected_color = color
+           root.destroy()
+
+       # initialize the selected color to None
+       self.selected_color = None
+
+       # run the window until it is closed
+       root.mainloop()
+
+       # return the selected color
+       return self.selected_color
+
+
+   def play_card(self, player_deck, player, discard_pile, deck, players, wild_card_color=None):
        top_card = self.discard_pile[-1]
        valid_cards = []
 
        # Check if any card matches the color or number of the top card
-       for card in player_deck:
-           if card[0] == top_card[0] or card[1:] == top_card[1:]:
-               valid_cards.append(card)
+       for valid_card in player_deck:
+           if valid_card[0] == top_card[0] or valid_card[1:] == top_card[1:]:
+               valid_cards.append(valid_card)
 
        # Check if any draw2, reverse, or skip card matches the color of the top card
-       for card in player_deck:
-           if card[:-1] in ["draw2", "reverse", "skip"] and card[-1] == top_card[-1]:
-               valid_cards.append(card)
+       for valid_card in player_deck:
+           if valid_card[:-1] in ["draw2", "reverse", "skip"] and valid_card[-1] == top_card[-1]:
+               valid_cards.append(valid_card)
 
        # Always include any wild or wild4 card
        valid_cards.extend([card for card in player_deck if card.startswith("wild")])
@@ -194,6 +232,18 @@ class UNOGame:
            self.update_discard_pile()
            window.destroy()
 
+           if valid_card.startswith("wild"):
+               # ask player for new color selection
+               new_color = self.ask_for_color_selection()
+               # update the discard pile with the new color
+               messagebox.showinfo("Color Change", "The discard pile color has been changed to " + new_color)
+               discard_pile[1] = new_color + " " + top_card.split()[1] if "Draw 4" in top_card else new_color + " " + \
+                                                                                                    top_card.split()[0]
+               # show a pop-up window to announce the color change
+
+           else:
+               new_color = None
+
            for widget in self.player_frames[self.current_player - 1].winfo_children():
                widget.destroy()
 
@@ -202,15 +252,17 @@ class UNOGame:
                card_label = tk.Label(self.player_frames[self.current_player - 1], image=card_image)
                card_label.pack(side="left")
 
-       for card in valid_cards:
-           card_image = self.card_images[card]
-           card_button = tk.Button(window, image=card_image, command=lambda c=card: add_to_pile(c))
+       for valid_card in valid_cards:
+           card_image = self.card_images[valid_card]
+           card_button = tk.Button(window, image=card_image, command=lambda c=valid_card: add_to_pile(c))
+
            card_button.pack(side="left", padx=5)
 
        window.mainloop()
 
-       return None  # Player closed the window without selecting a card
 
+
+       return None  # Player closed the window without selecting a card
 
    def play_turn(self):
        player_deck = self.player_decks[self.current_player - 1]
