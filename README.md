@@ -15,4 +15,4 @@ Please download the following toolboxes:
 - pillow
 - easygui
 
-Here is our work log: https://www.unorules.com/
+Here is our work log: (https://docs.google.com/spreadsheets/d/1w1COjHemZEp1qa4RNWCCt6pKS-0J-wsRfQF6ln1RI6o/edit?usp=sharing)
