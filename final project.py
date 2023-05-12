@@ -2,6 +2,7 @@ import random
 import tkinter as tk
 from PIL import Image, ImageTk
 
+#Driver: Jacqueline, Observer: Josephine (debugging)
 class UNOGame: #defines 'UNOGame' class and its constructor method
     def __init__(self):   #initializes the object's attributes to set up the inital state of the game
         self.colors = ["red", "yellow", "green", "blue"]
@@ -12,6 +13,8 @@ class UNOGame: #defines 'UNOGame' class and its constructor method
         self.deck = []   #initializing the deck attribute to create a list representing the deck of cards of UNO by
                          #combining the different card types; used nested loops to iterate over the different types of
                          #cards and appends them to the deck list
+
+        # Driver: Josephine, Observer: Jacqueline (debugging)
         for color_type in self.colors:
             for number_type in self.numbers:
                 self.deck.append(str(number_type) + "" + color_type)
@@ -22,6 +25,7 @@ class UNOGame: #defines 'UNOGame' class and its constructor method
 
         random.shuffle(self.deck)   #shuffles the deck in a random order before starting the game
 
+        # Driver: Jacqueline, Observer: Josephine (debugging)
         self.number_players = 1  #initializes number of players
         self.draw_pile = []    #initializes draw and discard piles as empty lists
         self.discard_pile = []
@@ -46,28 +50,30 @@ class UNOGame: #defines 'UNOGame' class and its constructor method
         self.start_option.pack()
         self.card_images = {}
 
+        # Driver: Josephine, Observer: Jacqueline (debugging)
         #loading in the images of the cards
         for color in self.colors:
             for number in self.numbers:
-                image_path = f"/Users/jacquelinecho/PycharmProjects/CLPS0950-Final-Project/CLPS950_FinalProject_Cards/{number}{color}.png"
+                image_path = f"/Users/josephinechen/PycharmProjects/CLPS0950-Final-Project/CLPS950_FinalProject_Cards/{number}{color}.png"
                 card_image = Image.open(image_path)
                 card_image = card_image.resize((50, 70))
                 self.card_images[f"{number}{color}"] = ImageTk.PhotoImage(card_image)
 
             for action_card in self.action_cards:
-                image_path = f"/Users/jacquelinecho/PycharmProjects/CLPS0950-Final-Project/CLPS950_FinalProject_Cards/{action_card}{color}.png"
+                image_path = f"/Users/josephinechen/PycharmProjects/CLPS0950-Final-Project/CLPS950_FinalProject_Cards/{action_card}{color}.png"
                 card_image = Image.open(image_path)
                 card_image = card_image.resize((50, 70))
                 self.card_images[f"{action_card}{color}"] = ImageTk.PhotoImage(card_image)
 
         for wild_card in self.wild_cards:
-            image_path = f"/Users/jacquelinecho/PycharmProjects/CLPS0950-Final-Project/CLPS950_FinalProject_Cards/{wild_card}.png"
+            image_path = f"/Users/josephinechen/PycharmProjects/CLPS0950-Final-Project/CLPS950_FinalProject_Cards/{wild_card}.png"
             card_image = Image.open(image_path)
             card_image = card_image.resize((50, 70))
             self.card_images[f"{wild_card}"] = ImageTk.PhotoImage(card_image)
 
         self.window.mainloop()
 
+# Driver: Jacqueline, Observer: Josephine (debugging)
 #handles the initial dealing of the cards to each player in the game
     def deal_cards(self):
         self.player_decks = [[] for _ in range(self.number_players)]
@@ -82,6 +88,7 @@ class UNOGame: #defines 'UNOGame' class and its constructor method
 
         self.player_labels = []
 
+        #labeling each player's hand in the GUI
         for i in range(self.number_players):
             player_frame = tk.Frame(self.window)
             player_frame.pack()
@@ -123,6 +130,7 @@ class UNOGame: #defines 'UNOGame' class and its constructor method
             random.shuffle(self.draw_pile)
             first_card = self.draw_pile[0]
 
+    #announcing player turns in the GUI
         self.draw_pile_label = tk.Label(self.window)
         self.discard_pile_label = tk.Label(self.window)
         self.player_turn_label = tk.Label(self.window, text=f"Player 1's turn")
@@ -133,6 +141,7 @@ class UNOGame: #defines 'UNOGame' class and its constructor method
         self.discard_pile = [self.draw_pile.pop(0)]
         self.update_discard_pile()
 
+    #updating the identity and image of the card in the GUI
     def update_discard_pile(self):
         if self.discard_pile:
             top_card = self.discard_pile[-1]
@@ -140,6 +149,8 @@ class UNOGame: #defines 'UNOGame' class and its constructor method
             self.discard_pile_label.config(image=card_image)
             self.discard_pile_label.image = card_image
 
+    # Driver: Jacqueline, Observer: Josephine (debugging)
+    #customizing the draw and play buttons in the GUI according to game logic.
     def start(self):
         self.draw_button = tk.Button(self.window, text="Draw", command=self.draw_random_card)
         self.draw_button.pack()
@@ -159,6 +170,7 @@ class UNOGame: #defines 'UNOGame' class and its constructor method
             else:
                 frame.pack_forget()
 
+#customizing the number of players dropdown GUI.
     def select_number_players(self):
         self.number_players = int(self.number_players_var.get())
         if self.number_players in range(2, 6):
@@ -171,6 +183,8 @@ class UNOGame: #defines 'UNOGame' class and its constructor method
     def update_draw_pile(self):
         self.draw_pile_label.config()
 
+#adding a draw card functionality that allows players to add a card to their deck if they do not have a valid card. this
+    #function is also used for the plus2 and plus4 cards.
     def draw_random_card(self):
         if self.draw_pile:
             random_card = random.choice(self.draw_pile)
@@ -186,6 +200,9 @@ class UNOGame: #defines 'UNOGame' class and its constructor method
         else:
             pass  # Handle case when draw pile is empty
 
+
+        # Driver: Josephine, Observer: Jacqueline (debugging)
+        #creating a color selection window for the wild card, allowing players to choose the desired color to continue the game.
     def ask_for_color_selection(self):
         # create a new window
         window = tk.Toplevel()
@@ -218,6 +235,9 @@ class UNOGame: #defines 'UNOGame' class and its constructor method
         window.grab_set()
         window.wait_window()
         return self.selected_color
+
+        # Driver: Josephine, Observer: Jacqueline (debugging)
+    #picking out specific cards in the player's hand that match the card in the discard pile in color and/or number.
 
     def play_card(self, player_deck, player, discard_pile, deck, players, wild_card_color=None):
         top_card = self.discard_pile[-1]
@@ -259,6 +279,10 @@ class UNOGame: #defines 'UNOGame' class and its constructor method
         window = tk.Toplevel(self.window)
         window.title("Play Card")
 
+        # Driver: Josephine, Observer: Jacqueline (debugging)
+        #customizing the game logic for the action cards. creating GUI components that instruct players on
+        #the needed steps for each type of card.
+
         def add_to_pile(card):
             player_deck.remove(card)
 
@@ -288,7 +312,6 @@ class UNOGame: #defines 'UNOGame' class and its constructor method
                     label.pack()
                     skip_window.after(2000, skip_window.destroy)  # Close the window after 2 seconds
 
-
                 elif card.startswith("reverse"):
                     self.direction *= -1
                     self.players = self.players[::-1]
@@ -298,6 +321,8 @@ class UNOGame: #defines 'UNOGame' class and its constructor method
                     label.pack()
                     reverse_window.after(2000, reverse_window.destroy)
 
+#for wild cards, the color selection window will be prompted. then, the code will replace the top card of the
+            #discard pile with an 8 card of the chosen color.
             if card.startswith("wild"):
                 self.ask_for_color_selection()
                 new_color = self.selected_color
@@ -326,6 +351,8 @@ class UNOGame: #defines 'UNOGame' class and its constructor method
 
         return None  # Player closed the window without selecting a card
 
+        # Driver: Jacqueline, Observer: Josephine (debugging)
+#customizing winner message when a player finishes playing all of their cards.
     def show_winner_message(self, message):
         winner_window = tk.Toplevel(self.window)
         winner_window.title("Game Over")
@@ -333,6 +360,8 @@ class UNOGame: #defines 'UNOGame' class and its constructor method
         winner_label.pack()
         winner_window.after(2000, winner_window.destroy)
 
+    # Driver: Josephine, Observer: Jacqueline (debugging)
+    #game logic to represent a single turn, where a player selects a card, removes it from the deck, and places it on the discard pile.
     def play_turn(self):
         player_deck = self.player_decks[self.current_player - 1]
         card_to_play = self.play_card(player_deck)
@@ -352,6 +381,7 @@ class UNOGame: #defines 'UNOGame' class and its constructor method
         self.player_turn_label.config(text=f"Player {self.current_player}'s turn")
         return True
 
+#creating an end turn button to pass the active player turn to the subsequent player
     def end_turn(self):
         self.current_player = (self.current_player % self.number_players) + 1
         self.player_turn_label.config(text=f"Player {self.current_player}'s turn")
