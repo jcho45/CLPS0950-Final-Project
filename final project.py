@@ -4,14 +4,16 @@ from PIL import Image, ImageTk
 import easygui
 
 
-class UNOGame:
-    def __init__(self):
+class UNOGame: #defines 'UNOGame' class and its constructor method
+    def __init__(self):   #initializes the object's attributes to set up the inital state of the game
         self.colors = ["red", "yellow", "green", "blue"]
         self.numbers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
         self.action_cards = ["skip", "reverse", "draw2"]
         self.wild_cards = ["wild", "wild4"]
 
-        self.deck = []
+        self.deck = []   #initializing the deck attribute to create a list representing the deck of cards of UNO by
+                         #combining the different card types; used nested loops to iterate over the different types of
+                         #cards and appends them to the deck list
         for color_type in self.colors:
             for number_type in self.numbers:
                 self.deck.append(str(number_type) + "" + color_type)
@@ -20,47 +22,48 @@ class UNOGame:
         for wild_card_type in self.wild_cards:
             self.deck.append(wild_card_type)
 
-        random.shuffle(self.deck)
+        random.shuffle(self.deck)   #shuffles the deck in a random order before starting the game
 
-        self.number_players = 1
-        self.draw_pile = []
+        self.number_players = 1  #initializes number of players
+        self.draw_pile = []    #initializes draw and discard piles as empty lists
         self.discard_pile = []
-        self.player_turn_label = None
+        self.player_turn_label = None   #player_turn_label and player_frames are initialized and will be used later in the GUI
         self.player_frames = []
-        self.current_player = 1  # Variable to keep track of the current player's turn
-        self.players = []
-        self.selected_color = None
-        self.top_card = []
-        self.reverse = False
+        self.current_player = 1  #variable to keep track of the current player's turn
+        self.players = []  #initializes players as an empty list to store player objects that participate in the game
+        self.selected_color = None   #a variable that will be used when a wild card is played
+        self.top_card = []   #represents the top card of the discard pile, which is the current card in play
+        self.reverse = False  #keeps track of whether the direction of play is reserved or not
 
-        self.window = tk.Tk()
+        self.window = tk.Tk()   #creates the GUI the game is played in
         self.window.title("UNAS AMIGAS")
 
-        self.number_players_var = tk.StringVar(self.window, "2")
+        self.number_players_var = tk.StringVar(self.window, "2")  #setting the default number of players to 2 for a multiplayer game
         self.number_players_label = tk.Label(self.window, text="Number of Players:")
-        self.number_players_dropdown = tk.OptionMenu(self.window, self.number_players_var, "2", "3", "4", "5")
+        self.number_players_dropdown = tk.OptionMenu(self.window, self.number_players_var, "2", "3", "4", "5") #creating a dropdown for the range of players that can play
         self.number_players_label.pack(side="left")
         self.number_players_dropdown.pack(side="left")
 
-        self.start_option = tk.Button(self.window, text="Start Game", command=self.select_number_players)
+        self.start_option = tk.Button(self.window, text="Start Game", command=self.select_number_players) #creating a start button to initiate the game
         self.start_option.pack()
         self.card_images = {}
 
+        #loading in the images of the cards
         for color in self.colors:
             for number in self.numbers:
-                image_path = f"/Users/josephinechen/PycharmProjects/CLPS0950-Final-Project/CLPS950_FinalProject_Cards/{number}{color}.png"
+                image_path = f"/Users/jacquelinecho/PycharmProjects/CLPS0950-Final-Project/CLPS950_FinalProject_Cards/{number}{color}.png"
                 card_image = Image.open(image_path)
                 card_image = card_image.resize((50, 70))
                 self.card_images[f"{number}{color}"] = ImageTk.PhotoImage(card_image)
 
             for action_card in self.action_cards:
-                image_path = f"/Users/josephinechen/PycharmProjects/CLPS0950-Final-Project/CLPS950_FinalProject_Cards/{action_card}{color}.png"
+                image_path = f"/Users/jacquelinecho/PycharmProjects/CLPS0950-Final-Project/CLPS950_FinalProject_Cards/{action_card}{color}.png"
                 card_image = Image.open(image_path)
                 card_image = card_image.resize((50, 70))
                 self.card_images[f"{action_card}{color}"] = ImageTk.PhotoImage(card_image)
 
         for wild_card in self.wild_cards:
-            image_path = f"/Users/josephinechen/PycharmProjects/CLPS0950-Final-Project/CLPS950_FinalProject_Cards/{wild_card}.png"
+            image_path = f"/Users/jacquelinecho/PycharmProjects/CLPS0950-Final-Project/CLPS950_FinalProject_Cards/{wild_card}.png"
             card_image = Image.open(image_path)
             card_image = card_image.resize((50, 70))
             self.card_images[f"{wild_card}"] = ImageTk.PhotoImage(card_image)
@@ -246,7 +249,7 @@ class UNOGame:
 
 
         # Additional logic for top card starting with draw2, skip, or reverse
-        if top_card.startswith(("draw2", "skip", "reverse")):
+        if top_card.startswith(("draw2", "skip", "reverse", "8")):
             for valid_card in player_deck:
                 if (valid_card.startswith("wild") or valid_card[0] == top_card[0] or valid_card.startswith(top_card[:-1])):
                     valid_cards.append(valid_card)
@@ -342,14 +345,14 @@ class UNOGame:
         if card_to_play is None:
             return False  # Player didn't play a card
 
-        if len(player_deck) == 0:
-            self.show_winner_message(f"Player {self.current_player} has no more cards. Game over!")
-            return False
-
         player_deck.remove(card_to_play)
         self.discard_pile.append(card_to_play)
         self.update_discard_pile()
         self.update_draw_pile()
+
+        if len(player_deck) == 0:
+            self.show_winner_message(f"Player {self.current_player} has no more cards. Game over!")
+            return False
 
         self.current_player = (self.current_player % self.number_players) + 1
         self.player_turn_label.config(text=f"Player {self.current_player}'s turn")
