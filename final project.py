@@ -252,13 +252,15 @@ class UNOGame:
 
        # Check if any draw2, reverse, or skip card matches the color of the top card
        for valid_card in player_deck:
-           if valid_card[:-1] in ["draw2", "reverse", "skip"] and valid_card[-1] == top_card[-1] and valid_card[0] == \
-                   top_card[0]:
+           if valid_card.startswith("draw2") and valid_card[-1] == top_card[-1]:
+               valid_cards.append(valid_card)
+           elif valid_card.startswith("reverse") and valid_card[-1] == top_card[-1]:
+               valid_cards.append(valid_card)
+           elif valid_card.startswith("skip") and valid_card[-1] == top_card[-1]:
                valid_cards.append(valid_card)
 
        # Always include any wild or wild4 card
        valid_cards.extend([card for card in player_deck if card.startswith("wild")])
-
 
        if not valid_cards:
            no_card_window = tk.Toplevel(self.window)
