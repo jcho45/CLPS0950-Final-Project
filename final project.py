@@ -68,6 +68,7 @@ class UNOGame: #defines 'UNOGame' class and its constructor method
 
         self.window.mainloop()
 
+#handles the initial dealing of the cards to each player in the game
     def deal_cards(self):
         self.player_decks = [[] for _ in range(self.number_players)]
         self.initialize_piles()
@@ -91,7 +92,7 @@ class UNOGame: #defines 'UNOGame' class and its constructor method
             # Deal 7 cards to each player (excluding cards starting with "8")
             cards_to_deal = 7
             if i == 0:
-                cards_to_deal -= 1  # Subtract an extra card for the first player
+                cards_to_deal -= 1  # Subtract an extra card for the first player because it was giving an extra card initially
             for _ in range(cards_to_deal):
                 while True:
                     card = self.draw_pile.pop()
@@ -109,12 +110,13 @@ class UNOGame: #defines 'UNOGame' class and its constructor method
         self.window.update()
         self.start()
 
+#initialize the draw and discard piles
     def initialize_piles(self):
         self.draw_pile = list(self.deck)
         random.shuffle(self.draw_pile)
         self.discard_pile = [self.draw_pile.pop()]
 
-        # Draw the first card and check if it is an action or wild card
+        # Draw the first card and check if it is an action or wild card or card with "8", shuffle again until it's not
         first_card = self.draw_pile[0]
         while first_card.startswith(
                 ("draw2", "skip", "reverse", "wild", "wild4", "8blue", "8green", "8red", "8yellow")):
