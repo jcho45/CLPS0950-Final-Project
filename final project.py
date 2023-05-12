@@ -31,6 +31,7 @@ class UNOGame:
         self.players = []
         self.selected_color = None
         self.top_card = []
+        self.reverse = False
 
         self.window = tk.Tk()
         self.window.title("UNAS AMIGAS")
@@ -47,24 +48,31 @@ class UNOGame:
 
         for color in self.colors:
             for number in self.numbers:
-                image_path = f"/Users/jacquelinecho/PycharmProjects/CLPS0950-Final-Project/CLPS950_FinalProject_Cards/{number}{color}.png"
+                image_path = f"/Users/josephinechen/PycharmProjects/CLPS0950-Final-Project/CLPS950_FinalProject_Cards/{number}{color}.png"
                 card_image = Image.open(image_path)
                 card_image = card_image.resize((50, 70))
                 self.card_images[f"{number}{color}"] = ImageTk.PhotoImage(card_image)
 
             for action_card in self.action_cards:
-                image_path = f"/Users/jacquelinecho/PycharmProjects/CLPS0950-Final-Project/CLPS950_FinalProject_Cards/{action_card}{color}.png"
+                image_path = f"/Users/josephinechen/PycharmProjects/CLPS0950-Final-Project/CLPS950_FinalProject_Cards/{action_card}{color}.png"
                 card_image = Image.open(image_path)
                 card_image = card_image.resize((50, 70))
                 self.card_images[f"{action_card}{color}"] = ImageTk.PhotoImage(card_image)
 
         for wild_card in self.wild_cards:
-            image_path = f"/Users/jacquelinecho/PycharmProjects/CLPS0950-Final-Project/CLPS950_FinalProject_Cards/{wild_card}.png"
+            image_path = f"/Users/josephinechen/PycharmProjects/CLPS0950-Final-Project/CLPS950_FinalProject_Cards/{wild_card}.png"
             card_image = Image.open(image_path)
             card_image = card_image.resize((50, 70))
             self.card_images[f"{wild_card}"] = ImageTk.PhotoImage(card_image)
 
         self.window.mainloop()
+
+    def play_reverse_card(self):
+        self.reverse = not self.reverse
+        if self.reverse:
+            self.player_turn_label.config(text=f"Player {self.current_player}'s turn (REVERSE)")
+        else:
+            self.player_turn_label.config(text=f"Player {self.current_player}'s turn")
 
     def deal_cards(self):
         self.player_decks = [[] for _ in range(self.number_players)]
@@ -280,6 +288,15 @@ class UNOGame:
                     label = tk.Label(skip_window, text="Next Player, end your turn.")
                     label.pack()
                     skip_window.after(2000, skip_window.destroy)  # Close the window after 2 seconds
+
+                elif card.startswith("reverse"):
+                    self.play_reverse_card()
+                if not self.reverse:
+                    self.current_player += 1
+                else:
+                    self.current_player -= 1
+                    if self.current_player == 0:
+                        self.current_player = self.number_players
 
             if card.startswith("wild"):
                 self.ask_for_color_selection()
