@@ -1,8 +1,6 @@
 import random
 import tkinter as tk
 from PIL import Image, ImageTk
-import easygui
-
 
 class UNOGame: #defines 'UNOGame' class and its constructor method
     def __init__(self):   #initializes the object's attributes to set up the inital state of the game
@@ -33,7 +31,7 @@ class UNOGame: #defines 'UNOGame' class and its constructor method
         self.players = []  #initializes players as an empty list to store player objects that participate in the game
         self.selected_color = None   #a variable that will be used when a wild card is played
         self.top_card = []   #represents the top card of the discard pile, which is the current card in play
-        self.reverse = False  #keeps track of whether the direction of play is reserved or not
+        self.direction = 1  # clockwise direction, which is needed for reverse card functionality
 
         self.window = tk.Tk()   #creates the GUI the game is played in
         self.window.title("UNAS AMIGAS")
@@ -69,13 +67,6 @@ class UNOGame: #defines 'UNOGame' class and its constructor method
             self.card_images[f"{wild_card}"] = ImageTk.PhotoImage(card_image)
 
         self.window.mainloop()
-
-    def play_reverse_card(self):
-        self.reverse = not self.reverse
-        if self.reverse:
-            self.player_turn_label.config(text=f"Player {self.current_player}'s turn (REVERSE)")
-        else:
-            self.player_turn_label.config(text=f"Player {self.current_player}'s turn")
 
     def deal_cards(self):
         self.player_decks = [[] for _ in range(self.number_players)]
@@ -295,14 +286,15 @@ class UNOGame: #defines 'UNOGame' class and its constructor method
                     label.pack()
                     skip_window.after(2000, skip_window.destroy)  # Close the window after 2 seconds
 
+
                 elif card.startswith("reverse"):
-                    self.play_reverse_card()
-                if not self.reverse:
-                    self.current_player += 1
-                else:
-                    self.current_player -= 1
-                    if self.current_player == 0:
-                        self.current_player = self.number_players
+                    self.direction *= -1
+                    self.players = self.players[::-1]
+                    reverse_window = tk.Toplevel()
+                    reverse_window.title("Reverse Player Order")
+                    label = tk.Label(reverse_window, text="Player order has been reversed")
+                    label.pack()
+                    reverse_window.after(2000, reverse_window.destroy)
 
             if card.startswith("wild"):
                 self.ask_for_color_selection()
