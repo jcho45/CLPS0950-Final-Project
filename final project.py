@@ -47,19 +47,19 @@ class UNOGame:
 
        for color in self.colors:
            for number in self.numbers:
-               image_path = f"/Users/josephinechen/PycharmProjects/CLPS0950-Final-Project/CLPS950_FinalProject_Cards/{number}{color}.png"
+               image_path = f"/Users/jacquelinecho/PycharmProjects/CLPS0950-Final-Project/CLPS950_FinalProject_Cards/{number}{color}.png"
                card_image = Image.open(image_path)
                card_image = card_image.resize((50, 70))
                self.card_images[f"{number}{color}"] = ImageTk.PhotoImage(card_image)
 
            for action_card in self.action_cards:
-               image_path = f"/Users/josephinechen/PycharmProjects/CLPS0950-Final-Project/CLPS950_FinalProject_Cards/{action_card}{color}.png"
+               image_path = f"/Users/jacquelinecho/PycharmProjects/CLPS0950-Final-Project/CLPS950_FinalProject_Cards/{action_card}{color}.png"
                card_image = Image.open(image_path)
                card_image = card_image.resize((50, 70))
                self.card_images[f"{action_card}{color}"] = ImageTk.PhotoImage(card_image)
 
        for wild_card in self.wild_cards:
-           image_path = f"/Users/josephinechen/PycharmProjects/CLPS0950-Final-Project/CLPS950_FinalProject_Cards/{wild_card}.png"
+           image_path = f"/Users/jacquelinecho/PycharmProjects/CLPS0950-Final-Project/CLPS950_FinalProject_Cards/{wild_card}.png"
            card_image = Image.open(image_path)
            card_image = card_image.resize((50, 70))
            self.card_images[f"{wild_card}"] = ImageTk.PhotoImage(card_image)
@@ -86,12 +86,17 @@ class UNOGame:
            player_label.pack(side="left")
            self.player_labels.append(player_label)
 
-           # Deal 7 cards to each player
+           # Deal 7 cards to each player (excluding cards starting with "8")
            cards_to_deal = 7
            if i == 0:
                cards_to_deal -= 1  # Subtract an extra card for the first player
            for _ in range(cards_to_deal):
-               card = self.draw_pile.pop()
+               while True:
+                   card = self.draw_pile.pop()
+                   if not card.startswith("8"):
+                       break
+                   else:
+                       self.draw_pile.insert(0, card)  # Put the card back at the bottom of the draw pile
                self.player_decks[i].append(card)
                card_image = self.card_images[card]
                card_label = tk.Label(player_frame, image=card_image)
@@ -110,7 +115,7 @@ class UNOGame:
 
        # Draw the first card and check if it is an action or wild card
        first_card = self.draw_pile[0]
-       while first_card.startswith(("draw2", "skip", "reverse", "wild", "wild4")):
+       while first_card.startswith(("draw2", "skip", "reverse", "wild", "wild4", "8blue","8green","8red","8yellow")):
            random.shuffle(self.draw_pile)
            first_card = self.draw_pile[0]
 
@@ -247,11 +252,13 @@ class UNOGame:
 
        # Check if any draw2, reverse, or skip card matches the color of the top card
        for valid_card in player_deck:
-           if valid_card[:-1] in ["draw2", "reverse", "skip"] and valid_card[-1] == top_card[-1]:
+           if valid_card[:-1] in ["draw2", "reverse", "skip"] and valid_card[-1] == top_card[-1] and valid_card[0] == \
+                   top_card[0]:
                valid_cards.append(valid_card)
 
        # Always include any wild or wild4 card
        valid_cards.extend([card for card in player_deck if card.startswith("wild")])
+
 
        if not valid_cards:
            no_card_window = tk.Toplevel(self.window)
