@@ -45,19 +45,19 @@ class UNOGame:
 
        for color in self.colors:
            for number in self.numbers:
-               image_path = f"/Users/josephinechen/PycharmProjects/CLPS0950-Final-Project/CLPS950_FinalProject_Cards/{number}{color}.png"
+               image_path = f"/Users/jacquelinecho/PycharmProjects/CLPS0950-Final-Project/CLPS950_FinalProject_Cards/{number}{color}.png"
                card_image = Image.open(image_path)
                card_image = card_image.resize((50, 70))
                self.card_images[f"{number}{color}"] = ImageTk.PhotoImage(card_image)
 
            for action_card in self.action_cards:
-               image_path = f"/Users/josephinechen/PycharmProjects/CLPS0950-Final-Project/CLPS950_FinalProject_Cards/{action_card}{color}.png"
+               image_path = f"/Users/jacquelinecho/PycharmProjects/CLPS0950-Final-Project/CLPS950_FinalProject_Cards/{action_card}{color}.png"
                card_image = Image.open(image_path)
                card_image = card_image.resize((50, 70))
                self.card_images[f"{action_card}{color}"] = ImageTk.PhotoImage(card_image)
 
        for wild_card in self.wild_cards:
-           image_path = f"/Users/josephinechen/PycharmProjects/CLPS0950-Final-Project/CLPS950_FinalProject_Cards/{wild_card}.png"
+           image_path = f"/Users/jacquelinecho/PycharmProjects/CLPS0950-Final-Project/CLPS950_FinalProject_Cards/{wild_card}.png"
            card_image = Image.open(image_path)
            card_image = card_image.resize((50, 70))
            self.card_images[f"{wild_card}"] = ImageTk.PhotoImage(card_image)
@@ -103,15 +103,21 @@ class UNOGame:
    def initialize_piles(self):
        self.draw_pile = list(self.deck)
        random.shuffle(self.draw_pile)
-       self.discard_pile = [self.draw_pile.pop()]
 
+       # Draw the first card and check if it is an action or wild card
+       first_card = self.draw_pile[0]
+       while first_card.startswith(("draw2", "skip", "reverse", "wild", "wild4")):
+           random.shuffle(self.draw_pile)
+           first_card = self.draw_pile[0]
+
+       self.draw_pile_label = tk.Label(self.window)
+       self.discard_pile_label = tk.Label(self.window)
        self.player_turn_label = tk.Label(self.window, text=f"Player 1's turn")
        self.player_turn_label.pack()
-       self.draw_pile_label = tk.Label(self.window)
        self.draw_pile_label.pack()
-       self.discard_pile_label = tk.Label(self.window)
        self.discard_pile_label.pack()
 
+       self.discard_pile = [self.draw_pile.pop(0)]
        self.update_discard_pile()
 
    def update_discard_pile(self):
@@ -160,6 +166,7 @@ class UNOGame:
            self.player_decks[self.current_player - 1].append(random_card)
            card_label = tk.Label(self.player_frames[self.current_player - 1], image=card_image)
            card_label.pack(side="left")
+
        else:
            pass  # Handle case when draw pile is empty
 
@@ -197,6 +204,33 @@ class UNOGame:
        # return the selected color
        return self.selected_color
 
+   def reverse_play_direction():
+       # Get the current direction of play
+       current_direction = uno_game.players[1].direction
+
+       # Update the direction of play
+       if current_direction == "clockwise":
+           new_direction = "counterclockwise"
+       else:
+           new_direction = "clockwise"
+
+       # Update the direction for all players
+       for player in uno_game.players.values():
+           player.direction = new_direction
+
+       # Update the player turn label
+       uno_game.player_turn_label.config(text=f"Player {uno_game.current_player}'s turn")
+
+       # Reverse the order of player frames
+       uno_game.player_frames.reverse()
+
+       # Show the frame of the current player
+       uno_game.player_frames[uno_game.current_player - 1].pack()
+
+       # Hide the frames of the other players
+       for i, frame in enumerate(uno_game.player_frames):
+           if i != uno_game.current_player - 1:
+               frame.pack_forget()
 
    def play_card(self, player_deck, player, discard_pile, deck, players, wild_card_color=None):
        top_card = self.discard_pile[-1]
@@ -232,17 +266,40 @@ class UNOGame:
            self.update_discard_pile()
            window.destroy()
 
+           if card.startswith(("draw2", "reverse", "skip")):
+               # Perform the action based on the card type
+               if card.startswith("draw2"):
+                   # Skip the next player and make them draw 2 cards
+                   next_player = (self.current_player % self.number_players) + 1
+                   self.player_decks[next_player - 1].extend(self.draw_cards(deck, 2))
+                   self.update_draw_pile()
+               elif card.startswith("reverse"):
+                   # Reverse the direction of play
+                   self.reverse_play_direction()
+               elif card.startswith("skip"):
+                   # Skip the next player's turn
+                   self.current_player = (self.current_player % self.number_players) + 2
+                   self.player_turn_label.config(text=f"Player {self.current_player}'s turn")
+
            if valid_card.startswith("wild"):
                # ask player for new color selection
                new_color = self.ask_for_color_selection()
                # update the discard pile with the new color
-               messagebox.showinfo("Color Change", "The discard pile color has been changed to " + new_color)
                discard_pile[1] = new_color + " " + top_card.split()[1] if "Draw 4" in top_card else new_color + " " + \
                                                                                                     top_card.split()[0]
+
                # show a pop-up window to announce the color change
+               color_change_window = tk.Toplevel(self.window)
+               color_change_window.title("Color Change")
+               color_change_label = tk.Label(color_change_window,
+                                             text="The discard pile color has been changed to " + new_color)
+               color_change_label.pack()
+               self.window.after(1000, lambda: color_change_window.destroy())  # Close the window after 1 second
+               color_change_window.mainloop()
 
            else:
                new_color = None
+
 
            for widget in self.player_frames[self.current_player - 1].winfo_children():
                widget.destroy()
@@ -259,7 +316,6 @@ class UNOGame:
            card_button.pack(side="left", padx=5)
 
        window.mainloop()
-
 
 
        return None  # Player closed the window without selecting a card
