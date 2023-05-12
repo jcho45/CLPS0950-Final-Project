@@ -236,9 +236,12 @@ class UNOGame:
         # Include any wild or wild4 card
         valid_cards.extend([card for card in player_deck if card.startswith("wild")])
 
+
         # Additional logic for top card starting with draw2, skip, or reverse
         if top_card.startswith(("draw2", "skip", "reverse")):
-            valid_cards = [card for card in valid_cards if card.startswith("wild") or card[0] == top_card[0]]
+            for valid_card in player_deck:
+                if (valid_card.startswith("wild") or valid_card[0] == top_card[0] or valid_card.startswith(top_card[:-1])):
+                    valid_cards.append(valid_card)
 
         if not valid_cards:
             if self.window.winfo_exists():  # Check if the main window is still active
