@@ -15,4 +15,6 @@ Please download the following toolboxes:
 - pillow
 - easygui
 
+Also, please download the card deck labeled "CLPS950_FinalProject_Cards" before you begin playing.
+
 Here is our work log: (https://docs.google.com/spreadsheets/d/1w1COjHemZEp1qa4RNWCCt6pKS-0J-wsRfQF6ln1RI6o/edit?usp=sharing)
