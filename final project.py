@@ -2,7 +2,6 @@ import random
 import tkinter as tk
 from PIL import Image, ImageTk
 import easygui
-from tkinter import messagebox
 
 
 class UNOGame:
@@ -48,19 +47,19 @@ class UNOGame:
 
         for color in self.colors:
             for number in self.numbers:
-                image_path = f"/Users/josephinechen/PycharmProjects/CLPS0950-Final-Project/CLPS950_FinalProject_Cards/{number}{color}.png"
+                image_path = f"/Users/jacquelinecho/PycharmProjects/CLPS0950-Final-Project/CLPS950_FinalProject_Cards/{number}{color}.png"
                 card_image = Image.open(image_path)
                 card_image = card_image.resize((50, 70))
                 self.card_images[f"{number}{color}"] = ImageTk.PhotoImage(card_image)
 
             for action_card in self.action_cards:
-                image_path = f"/Users/josephinechen/PycharmProjects/CLPS0950-Final-Project/CLPS950_FinalProject_Cards/{action_card}{color}.png"
+                image_path = f"/Users/jacquelinecho/PycharmProjects/CLPS0950-Final-Project/CLPS950_FinalProject_Cards/{action_card}{color}.png"
                 card_image = Image.open(image_path)
                 card_image = card_image.resize((50, 70))
                 self.card_images[f"{action_card}{color}"] = ImageTk.PhotoImage(card_image)
 
         for wild_card in self.wild_cards:
-            image_path = f"/Users/josephinechen/PycharmProjects/CLPS0950-Final-Project/CLPS950_FinalProject_Cards/{wild_card}.png"
+            image_path = f"/Users/jacquelinecho/PycharmProjects/CLPS0950-Final-Project/CLPS950_FinalProject_Cards/{wild_card}.png"
             card_image = Image.open(image_path)
             card_image = card_image.resize((50, 70))
             self.card_images[f"{wild_card}"] = ImageTk.PhotoImage(card_image)
@@ -234,16 +233,21 @@ class UNOGame:
             elif valid_card.startswith("skip") and valid_card[-1] == top_card[-1]:
                 valid_cards.append(valid_card)
 
-        # Always include any wild or wild4 card
+        # Include any wild or wild4 card
         valid_cards.extend([card for card in player_deck if card.startswith("wild")])
 
+        # Additional logic for top card starting with draw2, skip, or reverse
+        if top_card.startswith(("draw2", "skip", "reverse")):
+            valid_cards = [card for card in valid_cards if card.startswith("wild") or card[0] == top_card[0]]
+
         if not valid_cards:
-            no_card_window = tk.Toplevel(self.window)
-            no_card_window.title("No playable cards")
-            no_card_label = tk.Label(no_card_window, text="No playable cards: Draw Card")
-            no_card_label.pack()
-            self.window.after(2000, lambda: no_card_window.destroy())  # Close the window after 3 seconds
-            no_card_window.mainloop()
+            if self.window.winfo_exists():  # Check if the main window is still active
+                no_card_window = tk.Toplevel(self.window)
+                no_card_window.title("No playable cards")
+                no_card_label = tk.Label(no_card_window, text="No playable cards: Draw Card")
+                no_card_label.pack()
+                self.window.after(2000, lambda: no_card_window.destroy())  # Close the window after 2 seconds
+                no_card_window.mainloop()
 
         window = tk.Toplevel(self.window)
         window.title("Play Card")
@@ -253,26 +257,29 @@ class UNOGame:
 
             if card.startswith(("draw2", "reverse", "skip", "wild4")):
                 # Perform the action based on the card type
+                window.destroy()  # Close the card selection window
+
                 if card.startswith("draw2"):
                     # Skip the next player and make them draw 2 cards
-                    self.window = tk.Tk()
-                    self.window.title("Draw 2 Cards")
-                    label = tk.Label(self.window, text=f"Next Player, draw 2 cards and end your turn.")
+                    draw2_window = tk.Toplevel()
+                    draw2_window.title("Draw 2 Cards")
+                    label = tk.Label(draw2_window, text="Next Player, draw 2 cards and end your turn.")
                     label.pack()
-                window.destroy()
-                if card.startswith("wild4"):
-                    self.window = tk.Tk()
-                    self.window.title("Draw 4 Cards")
-                    label = tk.Label(self.window, text=f"Next Player, draw 4 cards and end your turn.")
-                    label.pack()
-                window.destroy()
-                if card.startswith("skip"):
-                    self.window = tk.Tk()
-                    self.window.title("Skip Turn")
-                    label = tk.Label(self.window, text=f"Next Player, end your turn.")
-                    label.pack()
-                window.destroy()
+                    draw2_window.after(2000, draw2_window.destroy)  # Close the window after 2 seconds
 
+                elif card.startswith("wild4"):
+                    wild4_window = tk.Toplevel()
+                    wild4_window.title("Draw 4 Cards")
+                    label = tk.Label(wild4_window, text="Next Player, draw 4 cards and end your turn.")
+                    label.pack()
+                    wild4_window.after(2000, wild4_window.destroy)  # Close the window after 2 seconds
+
+                elif card.startswith("skip"):
+                    skip_window = tk.Toplevel()
+                    skip_window.title("Skip Turn")
+                    label = tk.Label(skip_window, text="Next Player, end your turn.")
+                    label.pack()
+                    skip_window.after(2000, skip_window.destroy)  # Close the window after 2 seconds
 
             if card.startswith("wild"):
                 self.ask_for_color_selection()
@@ -284,7 +291,6 @@ class UNOGame:
 
             self.update_discard_pile()
             window.destroy()
-
 
             for widget in self.player_frames[self.current_player - 1].winfo_children():
                 widget.destroy()
@@ -303,11 +309,22 @@ class UNOGame:
 
         return None  # Player closed the window without selecting a card
 
+    def show_winner_message(self, message):
+        winner_window = tk.Toplevel(self.window)
+        winner_window.title("Game Over")
+        winner_label = tk.Label(winner_window, text=message)
+        winner_label.pack()
+        winner_window.after(2000, winner_window.destroy)
+
     def play_turn(self):
         player_deck = self.player_decks[self.current_player - 1]
         card_to_play = self.play_card(player_deck)
         if card_to_play is None:
             return False  # Player didn't play a card
+
+        if len(player_deck) == 0:
+            self.show_winner_message(f"Player {self.current_player} has no more cards. Game over!")
+            return False
 
         player_deck.remove(card_to_play)
         self.discard_pile.append(card_to_play)
